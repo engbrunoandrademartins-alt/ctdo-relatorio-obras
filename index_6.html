@@ -1,0 +1,2603 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="color-scheme" content="light">
+<title>Relatório de Obras · CTDO</title>
+<style>
+  :root{
+    --color-bg:#EEF1F4;
+    --color-surface:#FFFFFF;
+    --color-primary:#0F2A43;
+    --color-primary-light:#1F4868;
+    --color-accent:#2C6E8E;
+    --color-text:#1C2B36;
+    --color-text-muted:#5B6B7A;
+    --color-border:#D7DEE3;
+    --color-success:#3F7D58;
+    --color-success-bg:#E8F0EA;
+    --color-warning:#9C6B16;
+    --color-warning-bg:#F6EEDD;
+    --color-danger:#A23B3B;
+    --color-danger-bg:#F7E9E9;
+    --font-sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+    --font-mono:ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:var(--color-bg);
+    color:var(--color-text);
+    font-family:var(--font-sans);
+    font-size:16px;
+    line-height:1.45;
+    -webkit-text-size-adjust:100%;
+    padding-bottom:48px;
+  }
+
+  .app-shell{max-width:880px;margin:0 auto;padding:16px;}
+
+  .app-topbar{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    padding:14px 4px 18px;
+    border-bottom:1px solid var(--color-border);
+    margin-bottom:16px;
+  }
+  #topbar-logo{max-height:52px;max-width:76px;object-fit:contain;display:none;}
+  .app-topbar h1{
+    font-size:18px;
+    margin:0;
+    color:var(--color-primary);
+    letter-spacing:0.01em;
+    line-height:1.25;
+  }
+  .app-topbar .subtitle{
+    display:block;
+    font-size:12px;
+    color:var(--color-text-muted);
+    font-weight:400;
+    margin-top:2px;
+  }
+
+  .view{display:none;}
+  .view.active{display:block;}
+
+  .card{
+    background:var(--color-surface);
+    border:1px solid var(--color-border);
+    border-left:4px solid var(--color-primary);
+    border-radius:8px;
+    padding:18px;
+    margin-bottom:16px;
+    box-shadow:0 1px 2px rgba(15,42,67,0.06);
+  }
+
+  .card-eyebrow{
+    font-size:11px;
+    font-weight:700;
+    letter-spacing:0.09em;
+    color:var(--color-accent);
+    text-transform:uppercase;
+    margin:0 0 14px;
+    display:flex;
+    align-items:center;
+    gap:8px;
+  }
+  .card-eyebrow .num{
+    font-family:var(--font-mono);
+    color:#fff;
+    background:var(--color-primary);
+    border-radius:4px;
+    padding:1px 6px;
+    font-size:11px;
+    letter-spacing:0;
+  }
+  .card-eyebrow .divider{
+    flex:1;
+    height:1px;
+    background:var(--color-border);
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:600;
+    color:var(--color-text-muted);
+    margin-bottom:14px;
+  }
+  label > span.label-text{display:block;margin-bottom:6px;}
+
+  input[type="text"],
+  input[type="date"],
+  input[type="number"],
+  input[type="search"],
+  textarea,
+  select{
+    width:100%;
+    min-height:44px;
+    font-size:16px;
+    font-family:var(--font-sans);
+    color:var(--color-text);
+    background:#fff;
+    border:1px solid var(--color-border);
+    border-radius:6px;
+    padding:9px 12px;
+    -webkit-appearance:none;
+    appearance:none;
+  }
+  textarea{resize:vertical;min-height:64px;}
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible,
+  button:focus-visible{
+    outline:2px solid var(--color-accent);
+    outline-offset:1px;
+  }
+  ::placeholder{color:#9AAAB6;}
+
+  .form-grid-2{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:0 16px;
+  }
+  @media (min-width:640px){
+    .form-grid-2{grid-template-columns:1fr 1fr;}
+  }
+
+  .header-empresa-grid{
+    display:grid;
+    grid-template-columns:1fr;
+    gap:14px;
+    margin-bottom:14px;
+    align-items:start;
+  }
+  @media (min-width:640px){
+    .header-empresa-grid{grid-template-columns:120px 1fr;}
+  }
+
+  .logo-dropzone{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    width:100%;
+    min-height:96px;
+    border:1.5px dashed var(--color-border);
+    border-radius:8px;
+    background:#FAFBFC;
+    cursor:pointer;
+    text-align:center;
+    padding:8px;
+    color:var(--color-text-muted);
+    font-size:12px;
+    font-weight:600;
+  }
+  .logo-preview-img{
+    max-width:100%;
+    max-height:90px;
+    display:block;
+    object-fit:contain;
+  }
+  .logo-upload .btn-text{margin-top:6px;}
+
+  .btn{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    min-height:44px;
+    padding:0 18px;
+    font-size:15px;
+    font-weight:600;
+    border-radius:6px;
+    border:1.5px solid transparent;
+    cursor:pointer;
+    font-family:var(--font-sans);
+    white-space:nowrap;
+  }
+  .btn-primary{background:var(--color-primary);color:#fff;}
+  .btn-primary:active{background:var(--color-primary-light);}
+  .drive-acoes{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;}
+  .drive-acoes .btn{text-decoration:none;display:inline-flex;align-items:center;}
+  .drive-frame-wrap{border:1px solid #D5DDE3;border-radius:8px;overflow:hidden;background:#fff;}
+  #drive-frame{display:block;width:100%;height:420px;border:0;}
+  .erro-carga{max-width:520px;margin:0 auto;text-align:left;background:#fff;border:1px solid #E7C3BB;border-left:4px solid #B3402F;border-radius:8px;padding:16px 18px;color:#1F2A33;}
+  .erro-carga h2{font-size:17px;margin:0 0 6px;color:#B3402F;}
+  .erro-carga p{margin:0 0 10px;font-size:14px;line-height:1.45;}
+  .erro-carga code{font-size:12px;color:#5B6B7A;word-break:break-word;}
+  .btn-secondary{background:#fff;color:var(--color-primary);border-color:var(--color-primary);}
+  .btn-secondary:active{background:#F0F4F7;}
+  .btn-danger-outline{background:#fff;color:var(--color-danger);border-color:var(--color-danger);}
+  .btn-text{background:none;border:none;color:var(--color-accent);font-size:13px;font-weight:600;padding:6px 4px;min-height:32px;cursor:pointer;}
+  .btn-text-danger{background:none;border:none;color:var(--color-danger);font-size:14px;font-weight:600;padding:6px 8px;min-height:40px;cursor:pointer;}
+  .btn-block{width:100%;margin-bottom:10px;}
+  .btn[disabled]{opacity:0.55;cursor:default;}
+
+  .servico-card,.foto-card{
+    border:1px solid var(--color-border);
+    border-radius:8px;
+    padding:14px;
+    margin-bottom:12px;
+    background:#FCFDFD;
+    position:relative;
+  }
+  .servico-card-header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:10px;
+  }
+  .servico-numero{
+    font-family:var(--font-mono);
+    font-size:13px;
+    font-weight:700;
+    color:var(--color-primary);
+  }
+
+  .status-row{display:grid;grid-template-columns:1fr 110px;gap:0 12px;align-items:start;}
+  .status-chip{
+    display:inline-block;
+    font-size:11px;
+    font-weight:700;
+    text-transform:uppercase;
+    letter-spacing:0.03em;
+    padding:3px 8px;
+    border-radius:4px;
+    margin-top:6px;
+  }
+  .status-chip.st-a-executar,.status-chip.st-a-iniciar{background:#EAEDF0;color:var(--color-text-muted);}
+  .status-chip.st-em-andamento{background:var(--color-warning-bg);color:var(--color-warning);}
+  .status-chip.st-concluido,.status-chip.st-concluida{background:var(--color-success-bg);color:var(--color-success);}
+  .status-chip.st-paralisada{background:var(--color-danger-bg);color:var(--color-danger);}
+
+  .empty-hint{
+    font-size:13px;
+    color:var(--color-text-muted);
+    padding:10px 2px 14px;
+  }
+
+  .fotos-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(150px,1fr));
+    gap:14px;
+    margin-bottom:14px;
+  }
+  .foto-card{padding:10px;}
+
+  .projetos-lista{margin-bottom:14px;}
+  .projeto-card{
+    border:1px solid var(--color-border);
+    border-radius:8px;
+    padding:12px 14px;
+    margin-bottom:10px;
+    background:#FCFDFD;
+    display:flex;
+    flex-wrap:wrap;
+    align-items:flex-start;
+    gap:10px;
+  }
+  .projeto-icon{
+    width:38px;height:38px;flex:0 0 38px;
+    border-radius:7px;
+    background:var(--color-danger-bg);
+    color:var(--color-danger);
+    display:flex;align-items:center;justify-content:center;
+    font-size:11px;font-weight:800;letter-spacing:0.02em;
+  }
+  .projeto-icon.art-icon{background:var(--color-warning-bg);color:var(--color-warning);}
+  .projeto-info{flex:1 1 180px;min-width:180px;}
+  .projeto-info label{margin-bottom:8px;}
+  .projeto-meta{font-size:11px;color:var(--color-text-muted);margin-top:2px;}
+  .projeto-actions{display:flex;flex-direction:column;gap:6px;align-items:stretch;}
+  .projeto-actions .btn{min-height:36px;font-size:12px;padding:0 12px;}
+
+  /* ---------- CRONOGRAMA (mini-Gantt) ---------- */
+  .cronograma-item{
+    border:1px solid var(--color-border);
+    border-radius:8px;
+    padding:14px;
+    margin-bottom:12px;
+    background:#FCFDFD;
+  }
+  .cronograma-item-header{
+    display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:10px;
+  }
+  .cronograma-item-header h4{margin:0;font-size:13px;color:var(--color-primary);}
+  .cronograma-dates-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 12px;}
+  .gantt-track{position:relative;height:38px;background:#EEF1F4;border-radius:6px;margin:10px 0 4px;}
+  .gantt-bar{position:absolute;height:10px;border-radius:5px;top:4px;}
+  .gantt-bar.previsto{background:var(--color-accent);opacity:0.5;}
+  .gantt-bar.real-ok{background:var(--color-success);top:20px;}
+  .gantt-bar.real-andamento{background:var(--color-primary);top:20px;}
+  .gantt-bar.real-atrasado{background:var(--color-danger);top:20px;}
+  .gantt-caption{font-size:11px;color:var(--color-text-muted);}
+  .gantt-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--color-text-muted);margin-bottom:12px;}
+  .gantt-legend span{display:inline-flex;align-items:center;gap:5px;}
+  .gantt-legend i{width:10px;height:10px;border-radius:3px;display:inline-block;}
+  .foto-thumb{
+    width:100%;
+    height:120px;
+    object-fit:cover;
+    border-radius:6px;
+    display:block;
+    margin-bottom:8px;
+    background:#E3E8EC;
+  }
+  .foto-card label{margin-bottom:8px;font-size:12px;}
+  .foto-card input[type="text"], .foto-card input[type="date"], .foto-card input[type="number"], .foto-card select{min-height:40px;font-size:14px;padding:6px 10px;}
+  .foto-meta-grid{display:grid;grid-template-columns:1fr 1fr;gap:0 10px;}
+
+  .btn-icon-remove{
+    background:#fff;
+    border:1px solid var(--color-danger);
+    color:var(--color-danger);
+    font-size:12px;
+    font-weight:700;
+    border-radius:5px;
+    padding:5px 10px;
+    min-height:32px;
+    cursor:pointer;
+  }
+
+  .export-hint{
+    font-size:12px;
+    color:var(--color-text-muted);
+    margin-top:6px;
+    line-height:1.5;
+  }
+
+  .toast{
+    position:fixed;
+    left:50%;
+    bottom:22px;
+    transform:translateX(-50%) translateY(16px);
+    background:var(--color-primary);
+    color:#fff;
+    padding:11px 18px;
+    border-radius:7px;
+    font-size:14px;
+    max-width:90%;
+    text-align:center;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity .25s ease, transform .25s ease;
+    z-index:1000;
+    box-shadow:0 4px 14px rgba(0,0,0,0.2);
+  }
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0);}
+
+  #report-print-container{position:fixed;left:-9999px;top:0;background:#fff;}
+
+  /* ---------- PAINEL GERAL ---------- */
+  .config-details{margin-bottom:16px;}
+  .config-details summary{cursor:pointer;font-size:13px;font-weight:700;color:var(--color-accent);padding:6px 2px;list-style:none;}
+  .config-details summary::-webkit-details-marker{display:none;}
+  .config-details summary:before{content:"⚙ ";}
+  .config-details[open] summary{margin-bottom:10px;}
+
+  .search-row{margin-bottom:10px;}
+
+  .tabs-row{
+    display:flex;
+    gap:6px;
+    overflow-x:auto;
+    padding-bottom:6px;
+    margin-bottom:14px;
+  }
+  .tab-btn{
+    flex:0 0 auto;
+    padding:7px 13px;
+    border-radius:20px;
+    border:1px solid var(--color-border);
+    background:#fff;
+    font-size:12px;
+    font-weight:700;
+    color:var(--color-text-muted);
+    cursor:pointer;
+    white-space:nowrap;
+  }
+  .tab-btn.active{background:var(--color-primary);color:#fff;border-color:var(--color-primary);}
+
+  .obra-card{
+    background:var(--color-surface);
+    border:1px solid var(--color-border);
+    border-left:4px solid var(--color-accent);
+    border-radius:8px;
+    padding:16px;
+    margin-bottom:12px;
+  }
+  .obra-card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .obra-card h3{margin:0;font-size:16px;color:var(--color-primary);line-height:1.3;}
+  .obra-card .obra-sub{font-size:12px;color:var(--color-text-muted);margin-top:3px;}
+  .progress-track{background:#E3E8EC;border-radius:6px;height:8px;overflow:hidden;margin:12px 0 4px;}
+  .progress-fill{background:var(--color-accent);height:100%;border-radius:6px;}
+  .progress-label{font-size:11px;color:var(--color-text-muted);display:flex;justify-content:space-between;}
+  .obra-card-actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;}
+  .obra-card-actions .btn{padding:0 14px;min-height:38px;font-size:13px;}
+
+  .back-row{margin-bottom:6px;}
+</style>
+</head>
+<body>
+
+<div class="app-shell">
+
+  <div id="loading-state" style="text-align:center;color:var(--color-text-muted);padding:60px 16px;">Carregando dados…</div>
+
+  <header class="app-topbar">
+    <img id="topbar-logo" alt="Logo">
+    <div>
+      <h1 id="topbar-org-name">CTDO — Coordenadoria Técnica de Obras</h1>
+      <span class="subtitle" id="topbar-org-subtitle">Prefeitura Municipal de Cuiabá · Relatório fotográfico de obras</span>
+    </div>
+  </header>
+
+  <!-- ==================== PAINEL GERAL ==================== -->
+  <main class="view" id="view-dashboard">
+
+    <details class="card config-details" id="config-panel">
+      <summary>Configurar cabeçalho (logo e nome do órgão)</summary>
+
+      <div class="header-empresa-grid">
+        <div class="logo-upload">
+          <label for="input-logo" class="logo-dropzone" id="logo-dropzone">
+            <img id="logo-preview-img" class="logo-preview-img" style="display:none;" alt="Pré-visualização do logotipo">
+            <span id="logo-placeholder-text">Toque para<br>adicionar logo<br>da Prefeitura</span>
+          </label>
+          <input type="file" id="input-logo" accept="image/*" style="display:none;">
+          <button type="button" id="btn-remove-logo" class="btn-text" style="display:none;">Remover logotipo</button>
+        </div>
+        <div>
+          <label for="input-org-nome" style="margin-bottom:12px;">
+            <span class="label-text">Nome do órgão (cabeçalho)</span>
+            <input type="text" id="input-org-nome" placeholder="Ex.: CTDO — Coordenadoria Técnica de Obras">
+          </label>
+          <label for="input-org-subtitulo" style="margin-bottom:0;">
+            <span class="label-text">Linha secundária</span>
+            <input type="text" id="input-org-subtitulo" placeholder="Ex.: Prefeitura Municipal de Cuiabá">
+          </label>
+        </div>
+      </div>
+      <p class="export-hint">Esse cabeçalho (logo + nome do órgão) aparece em todos os relatórios exportados, independente da obra.</p>
+    </details>
+
+    <div class="search-row">
+      <input type="search" id="input-busca-obra" placeholder="Buscar obra por nome ou endereço">
+    </div>
+
+    <div class="tabs-row" id="filtro-status">
+      <button type="button" class="tab-btn active" data-status="Todas">Todas</button>
+      <button type="button" class="tab-btn" data-status="A iniciar">A iniciar</button>
+      <button type="button" class="tab-btn" data-status="Em andamento">Em andamento</button>
+      <button type="button" class="tab-btn" data-status="Concluída">Concluída</button>
+      <button type="button" class="tab-btn" data-status="Paralisada">Paralisada</button>
+    </div>
+
+    <button type="button" id="btn-nova-obra" class="btn btn-primary btn-block">+ Nova obra</button>
+
+    <div id="obras-lista"></div>
+    <p class="empty-hint" id="obras-empty-hint">Nenhuma obra cadastrada ainda.</p>
+
+    <button type="button" id="btn-exportar-resumo" class="btn btn-secondary btn-block" style="margin-top:6px;">Exportar resumo geral (PDF)</button>
+  </main>
+
+  <!-- ==================== RELATÓRIO DA OBRA ==================== -->
+  <main class="view" id="view-obra">
+
+    <div class="back-row">
+      <button type="button" id="btn-voltar-painel" class="btn-text">← Painel geral</button>
+    </div>
+
+    <!-- IDENTIFICAÇÃO DA OBRA -->
+    <section class="card" id="card-identificacao">
+      <p class="card-eyebrow"><span class="num">01</span>Identificação da obra<span class="divider"></span></p>
+
+      <label for="input-obra-nome">
+        <span class="label-text">Nome da obra *</span>
+        <input type="text" id="input-obra-nome" placeholder="Ex.: UBS Pedra 90 III e IV">
+      </label>
+
+      <label for="input-obra-endereco">
+        <span class="label-text">Endereço / Localização</span>
+        <input type="text" id="input-obra-endereco" placeholder="Endereço completo ou ponto de referência">
+      </label>
+
+      <div class="form-grid-2">
+        <label for="input-obra-responsavel">
+          <span class="label-text">Responsável técnico *</span>
+          <input type="text" id="input-obra-responsavel" placeholder="Nome do responsável técnico">
+        </label>
+        <label for="input-obra-art">
+          <span class="label-text">Número de contrato / ART</span>
+          <input type="text" id="input-obra-art" placeholder="Nº do contrato ou ART/RRT">
+        </label>
+      </div>
+
+      <div class="form-grid-2">
+        <label for="input-obra-status">
+          <span class="label-text">Status da obra</span>
+          <select id="input-obra-status">
+            <option value="A iniciar">A iniciar</option>
+            <option value="Em andamento">Em andamento</option>
+            <option value="Concluída">Concluída</option>
+            <option value="Paralisada">Paralisada</option>
+          </select>
+        </label>
+        <label for="input-obra-data" style="margin-bottom:0;">
+          <span class="label-text">Data deste relatório *</span>
+          <input type="date" id="input-obra-data">
+        </label>
+      </div>
+
+      <label for="input-obra-drive" style="margin-bottom:0;">
+        <span class="label-text">Pasta da obra no Google Drive</span>
+        <input type="url" id="input-obra-drive" placeholder="Cole o link da pasta (https://drive.google.com/drive/folders/...)">
+      </label>
+    </section>
+
+    <!-- CABEÇALHO DA VISITA -->
+    <section class="card" id="card-cabecalho">
+      <p class="card-eyebrow"><span class="divider"></span>Dados desta visita/medição<span class="divider"></span></p>
+
+      <label for="input-cab-motivo">
+        <span class="label-text">Motivo</span>
+        <input type="text" id="input-cab-motivo" placeholder="Ex.: vistoria de rotina, medição mensal, fiscalização de contrato">
+      </label>
+
+      <label for="input-cab-observacao" style="margin-bottom:0;">
+        <span class="label-text">Observação</span>
+        <textarea id="input-cab-observacao" rows="2" placeholder="Nota geral exibida no topo do relatório"></textarea>
+      </label>
+    </section>
+
+    <!-- SERVIÇOS A EXECUTAR -->
+    <section class="card" id="card-servicos">
+      <p class="card-eyebrow"><span class="num">02</span>Serviços a executar<span class="divider"></span></p>
+
+      <div id="servicos-lista"></div>
+      <p class="empty-hint" id="servicos-empty-hint">Nenhum serviço adicionado ainda. Toque em "Adicionar serviço" para começar.</p>
+
+      <button type="button" id="btn-add-servico" class="btn btn-secondary">+ Adicionar serviço</button>
+    </section>
+
+    <!-- REGISTRO FOTOGRÁFICO -->
+    <section class="card" id="card-fotos">
+      <p class="card-eyebrow"><span class="num">03</span>Registro fotográfico<span class="divider"></span></p>
+
+      <input type="file" id="input-fotos" accept="image/*" multiple capture="environment" style="display:none;">
+      <button type="button" id="btn-add-fotos" class="btn btn-secondary">Adicionar fotos</button>
+
+      <div class="fotos-grid" id="fotos-grid"></div>
+      <p class="empty-hint" id="fotos-empty-hint">Nenhuma foto anexada ainda.</p>
+    </section>
+
+    <!-- PROJETOS DA OBRA -->
+    <section class="card" id="card-projetos">
+      <p class="card-eyebrow"><span class="num">04</span>Projetos da obra<span class="divider"></span></p>
+
+      <input type="file" id="input-projetos" accept="application/pdf,.pdf" multiple style="display:none;">
+      <button type="button" id="btn-add-projetos" class="btn btn-secondary">+ Adicionar projeto (PDF)</button>
+
+      <div class="projetos-lista" id="projetos-lista"></div>
+      <p class="empty-hint" id="projetos-empty-hint">Nenhum projeto anexado ainda.</p>
+      <p class="export-hint">Aceita arquivos PDF (plantas, memoriais, etc.). Os arquivos ficam salvos no servidor (Supabase); o relatório exportado lista os projetos anexados, mas não embute o conteúdo dos PDFs.</p>
+    </section>
+
+    <!-- GOOGLE DRIVE -->
+    <section class="card" id="card-drive">
+      <p class="card-eyebrow"><span class="divider"></span>Arquivos no Google Drive<span class="divider"></span></p>
+      <div id="drive-vazio">
+        <p class="empty-hint" style="display:block;">Nenhuma pasta do Drive vinculada. Cole o link da pasta no campo "Pasta da obra no Google Drive", em Identificação da obra.</p>
+      </div>
+      <div id="drive-conteudo" style="display:none;">
+        <div class="drive-acoes">
+          <a id="drive-abrir" class="btn btn-secondary" href="#" target="_blank" rel="noopener">Abrir pasta no Drive ↗</a>
+          <button type="button" id="drive-recarregar" class="btn btn-secondary">Recarregar lista</button>
+        </div>
+        <div class="drive-frame-wrap"><iframe id="drive-frame" title="Arquivos da pasta no Google Drive" loading="lazy"></iframe></div>
+        <p class="export-hint">A lista aparece para quem tem acesso à pasta. Para a equipe inteira ver, compartilhe a pasta no Drive como "Qualquer pessoa com o link: Leitor". Se a lista vier vazia, use "Abrir pasta no Drive".</p>
+      </div>
+      <p class="empty-hint" id="drive-link-invalido" style="display:none;color:#B3402F;">Link não reconhecido. Use o link de uma pasta do Drive (contém /folders/).</p>
+    </section>
+
+    <!-- ARTs / RRTs -->
+    <section class="card" id="card-arts">
+      <p class="card-eyebrow"><span class="num">05</span>ARTs / RRTs<span class="divider"></span></p>
+
+      <input type="file" id="input-arts" accept="application/pdf,.pdf" multiple style="display:none;">
+      <button type="button" id="btn-add-arts" class="btn btn-secondary">+ Adicionar ART (PDF)</button>
+
+      <div class="projetos-lista" id="arts-lista"></div>
+      <p class="empty-hint" id="arts-empty-hint">Nenhuma ART anexada ainda.</p>
+      <p class="export-hint">Anexe as ARTs/RRTs de Projeto, Execução e Fiscalização. O relatório exportado lista as ARTs anexadas com número, tipo e responsável.</p>
+    </section>
+
+    <!-- CRONOGRAMA -->
+    <section class="card" id="card-cronograma">
+      <p class="card-eyebrow"><span class="num">06</span>Cronograma<span class="divider"></span></p>
+
+      <div class="gantt-legend">
+        <span><i style="background:var(--color-accent);opacity:0.5;"></i>Previsto</span>
+        <span><i style="background:var(--color-primary);"></i>Em andamento</span>
+        <span><i style="background:var(--color-success);"></i>Concluído no prazo</span>
+        <span><i style="background:var(--color-danger);"></i>Atrasado</span>
+      </div>
+
+      <div id="cronograma-lista"></div>
+      <p class="empty-hint" id="cronograma-empty-hint">Cadastre serviços na seção "02. Serviços a executar" para montar o cronograma.</p>
+    </section>
+
+    <!-- MATERIAIS -->
+    <section class="card" id="card-materiais">
+      <p class="card-eyebrow"><span class="num">07</span>Especificação e detalhamento de materiais<span class="divider"></span></p>
+
+      <div id="materiais-lista"></div>
+      <p class="empty-hint" id="materiais-empty-hint">Nenhum material especificado ainda. Toque em "Adicionar material" para começar.</p>
+
+      <button type="button" id="btn-add-material" class="btn btn-secondary">+ Adicionar material</button>
+    </section>
+
+    <!-- OBSERVAÇÕES GERAIS -->
+    <section class="card" id="card-observacoes">
+      <p class="card-eyebrow"><span class="num">08</span>Observações gerais<span class="divider"></span></p>
+      <label for="input-observacoes-gerais" style="margin-bottom:0;">
+        <span class="label-text">Anotações gerais sobre a obra</span>
+        <textarea id="input-observacoes-gerais" rows="4" placeholder="Registre aqui qualquer informação adicional relevante"></textarea>
+      </label>
+    </section>
+
+    <!-- EXPORTAÇÃO -->
+    <section class="card" id="card-export">
+      <p class="card-eyebrow"><span class="divider"></span>Exportar relatório desta obra<span class="divider"></span></p>
+      <button type="button" id="btn-exportar-pdf" class="btn btn-primary btn-block">Exportar PDF</button>
+      <button type="button" id="btn-exportar-word" class="btn btn-primary btn-block">Exportar Word (.docx)</button>
+      <p class="export-hint">Campos obrigatórios: nome da obra, responsável técnico e data do relatório. No iPhone/iPad, o arquivo pode abrir em uma nova aba — toque no ícone de compartilhar do Safari para salvar em Arquivos.</p>
+    </section>
+
+    <button type="button" id="btn-excluir-obra" class="btn-text-danger">Excluir esta obra</button>
+
+  </main>
+
+</div>
+
+<div id="toast" role="status" aria-live="polite" class="toast"></div>
+<div id="report-print-container" aria-hidden="true"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js"></script>
+
+<script>
+(function(){
+  "use strict";
+
+  var sb = null; // cliente Supabase
+
+  function todayISO(){ return new Date().toISOString().slice(0,10); }
+  function nowISO(){ return new Date().toISOString(); }
+
+  function defaultConfig(){
+    return {
+      logoPath:"",
+      logoBase64:"",
+      orgName:"CTDO — Coordenadoria Técnica de Obras",
+      orgSubtitle:"Prefeitura Municipal de Cuiabá · Relatório fotográfico de obras"
+    };
+  }
+
+  var appState = {
+    config: defaultConfig(),
+    obras: []
+  };
+  var currentObraId = null;
+  var filtroStatusAtual = "Todas";
+  var buscaAtual = "";
+
+  function generateId(){
+    return "id" + Date.now().toString(36) + Math.random().toString(36).slice(2,7);
+  }
+
+  function escapeHtml(str){
+    if(str === undefined || str === null) return "";
+    return String(str).replace(/[&<>"']/g, function(ch){
+      return ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"})[ch];
+    });
+  }
+
+  function formatDateBR(iso){
+    if(!iso) return "";
+    var parts = iso.split("-");
+    if(parts.length !== 3) return iso;
+    return parts[2] + "/" + parts[1] + "/" + parts[0];
+  }
+
+  function slugify(str){
+    var base = (str || "obra").toString();
+    base = base.normalize ? base.normalize("NFD").replace(/[\u0300-\u036f]/g,"") : base;
+    base = base.replace(/[^a-zA-Z0-9]+/g,"-").replace(/(^-+|-+$)/g,"").toLowerCase();
+    return base || "obra";
+  }
+
+  function sanitizeFileName(name){
+    return (name || "arquivo.pdf").normalize("NFD").replace(/[\u0300-\u036f]/g,"")
+      .replace(/[^a-zA-Z0-9.\-]+/g,"-");
+  }
+
+  function buildFilename(obra, ext){
+    var slug = slugify(obra.nome);
+    var date = obra.dataRelatorio || todayISO();
+    return "relatorio-" + slug + "-" + date + "." + ext;
+  }
+
+  function chunk(arr, size){
+    var out = [];
+    for(var i=0;i<arr.length;i+=size){ out.push(arr.slice(i,i+size)); }
+    return out;
+  }
+
+  function getObraById(id){
+    return appState.obras.find(function(o){ return o.id === id; });
+  }
+
+  function publicUrl(path){
+    if(!path) return "";
+    return window.SUPABASE_URL + "/storage/v1/object/public/" + window.SUPABASE_BUCKET + "/" + path;
+  }
+
+  // ---------- TOAST ----------
+  var toastTimer = null;
+  function toast(message){
+    var el = document.getElementById("toast");
+    el.textContent = message;
+    el.classList.add("show");
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function(){ el.classList.remove("show"); }, 3800);
+  }
+
+  // ======================================================
+  // SUPABASE — CLIENTE, CARGA INICIAL E SALVAMENTO
+  // ======================================================
+  function initSupabaseClient(){
+    if(!window.supabase || !window.supabase.createClient){
+      throw new Error("Biblioteca do Supabase não carregada.");
+    }
+    if(!window.SUPABASE_URL || !window.SUPABASE_ANON_KEY){
+      throw new Error("Configuração do Supabase ausente (supabase-config.js).");
+    }
+    sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+  }
+
+  // ---------- GOOGLE DRIVE ----------
+  function driveFolderId(link){
+    if(!link) return "";
+    var m = link.match(/\/folders\/([A-Za-z0-9_-]{10,})/) || link.match(/[?&]id=([A-Za-z0-9_-]{10,})/);
+    if(m) return m[1];
+    if(/^[A-Za-z0-9_-]{20,}$/.test(link)) return link;
+    return "";
+  }
+  var driveFrameAtual = "";
+  function renderDrive(){
+    var o = getObraById(currentObraId);
+    var link = o ? (o.driveFolder || "") : "";
+    var id = driveFolderId(link);
+    document.getElementById("drive-vazio").style.display = link ? "none" : "block";
+    document.getElementById("drive-link-invalido").style.display = (link && !id) ? "block" : "none";
+    document.getElementById("drive-conteudo").style.display = id ? "block" : "none";
+    if(!id){ driveFrameAtual = ""; return; }
+    document.getElementById("drive-abrir").href = "https://drive.google.com/drive/folders/" + id;
+    var src = "https://drive.google.com/embeddedfolderview?id=" + encodeURIComponent(id) + "#list";
+    if(src !== driveFrameAtual){ document.getElementById("drive-frame").src = src; driveFrameAtual = src; }
+  }
+
+  function obraRowToState(row){
+    return {
+      id: row.id,
+      nome: row.nome || "",
+      endereco: row.endereco || "",
+      responsavel: row.responsavel || "",
+      contratoArt: row.contrato_art || "",
+      driveFolder: row.drive_folder || "",
+      status: row.status || "A iniciar",
+      dataRelatorio: row.data_relatorio || todayISO(),
+      cabecalho: { motivo: row.motivo || "", observacao: row.observacao || "" },
+      observacoesGerais: row.observacoes_gerais || "",
+      servicos: [], fotos: [], projetos: [], arts: [], materiais: [],
+      updatedAt: row.updated_at || nowISO()
+    };
+  }
+  function servicoRowToState(row){
+    return {
+      id: row.id, descricao: row.descricao || "", status: row.status || "A executar",
+      percentual: row.percentual || 0, observacoes: row.observacoes || "",
+      dataInicioPrevista: row.data_inicio_prevista || "", dataFimPrevista: row.data_fim_prevista || "",
+      dataInicioReal: row.data_inicio_real || "", dataFimReal: row.data_fim_real || ""
+    };
+  }
+  function fotoRowToState(row){
+    return {
+      id: row.id, storagePath: row.storage_path, dataUrl: publicUrl(row.storage_path),
+      legenda: row.legenda || "", data: row.data || "", percentual: row.percentual || 0,
+      servicoId: row.servico_id || ""
+    };
+  }
+  function projetoRowToState(row){
+    return {
+      id: row.id, nome: row.nome || "", categoria: row.categoria || "Outro",
+      storagePath: row.storage_path, fileName: row.file_name || "", fileSize: row.file_size || 0,
+      dataUpload: row.data_upload || ""
+    };
+  }
+  function artRowToState(row){
+    return {
+      id: row.id, numero: row.numero || "", tipo: row.tipo || "Projeto",
+      responsavel: row.responsavel || "", crea: row.crea || "", dataEmissao: row.data_emissao || "",
+      storagePath: row.storage_path, fileName: row.file_name || "", fileSize: row.file_size || 0,
+      dataUpload: row.data_upload || ""
+    };
+  }
+  function materialRowToState(row){
+    return {
+      id: row.id, descricao: row.descricao || "", unidade: row.unidade || "",
+      quantidadePrevista: (row.quantidade_prevista === null || row.quantidade_prevista === undefined) ? "" : row.quantidade_prevista,
+      quantidadeAplicada: (row.quantidade_aplicada === null || row.quantidade_aplicada === undefined) ? "" : row.quantidade_aplicada,
+      especificacao: row.especificacao || "", status: row.status || "Especificado",
+      servicoId: row.servico_id || ""
+    };
+  }
+
+  function loadStateFromSupabase(){
+    return Promise.all([
+      sb.from("config").select("*").eq("id", 1).maybeSingle(),
+      sb.from("obras").select("*").order("updated_at", { ascending:false }),
+      sb.from("servicos").select("*").order("ordem", { ascending:true }),
+      sb.from("fotos").select("*").order("ordem", { ascending:true }),
+      sb.from("projetos").select("*"),
+      sb.from("arts").select("*"),
+      sb.from("materiais").select("*")
+    ]).then(function(results){
+      results.forEach(function(r){ if(r.error) throw r.error; });
+      var cfgRes = results[0], obrasRes = results[1], servicosRes = results[2],
+          fotosRes = results[3], projetosRes = results[4], artsRes = results[5], materiaisRes = results[6];
+
+      appState.config = cfgRes.data ? {
+        logoPath: cfgRes.data.logo_url || "",
+        logoBase64: publicUrl(cfgRes.data.logo_url || ""),
+        orgName: cfgRes.data.org_name || defaultConfig().orgName,
+        orgSubtitle: cfgRes.data.org_subtitle || defaultConfig().orgSubtitle
+      } : defaultConfig();
+
+      var obrasMap = {};
+      appState.obras = (obrasRes.data || []).map(function(row){
+        var o = obraRowToState(row);
+        obrasMap[o.id] = o;
+        return o;
+      });
+      (servicosRes.data || []).forEach(function(row){ var o = obrasMap[row.obra_id]; if(o) o.servicos.push(servicoRowToState(row)); });
+      (fotosRes.data || []).forEach(function(row){ var o = obrasMap[row.obra_id]; if(o) o.fotos.push(fotoRowToState(row)); });
+      (projetosRes.data || []).forEach(function(row){ var o = obrasMap[row.obra_id]; if(o) o.projetos.push(projetoRowToState(row)); });
+      (artsRes.data || []).forEach(function(row){ var o = obrasMap[row.obra_id]; if(o) o.arts.push(artRowToState(row)); });
+      (materiaisRes.data || []).forEach(function(row){ var o = obrasMap[row.obra_id]; if(o) o.materiais.push(materialRowToState(row)); });
+    });
+  }
+
+  // ---------- SALVAMENTO (debounce por tabela+linha) ----------
+  var pendingUpdates = {};
+  function debouncedUpdate(table, id, payload){
+    var key = table + ":" + id;
+    var atual = pendingUpdates[key];
+    if(atual) clearTimeout(atual.timer);
+    var merged = Object.assign({}, atual ? atual.payload : {}, payload);
+    pendingUpdates[key] = {
+      payload: merged,
+      timer: setTimeout(function(){
+        delete pendingUpdates[key];
+        sb.from(table).update(merged).eq("id", id).then(function(res){
+          if(res.error){
+            console.error(res.error);
+            toast("Não foi possível salvar uma alteração. Verifique sua conexão.");
+          }
+        });
+      }, 600)
+    };
+  }
+
+  function tocarUpdatedAt(o){
+    o.updatedAt = nowISO();
+    debouncedUpdate("obras", o.id, { updated_at: o.updatedAt });
+  }
+
+  // ---------- COMPRESSÃO DE IMAGEM (retorna Blob, pronto p/ upload) ----------
+  function compressImage(file, maxDim, quality){
+    return new Promise(function(resolve, reject){
+      var reader = new FileReader();
+      reader.onerror = function(){ reject(reader.error || new Error("Erro de leitura")); };
+      reader.onload = function(){
+        var img = new Image();
+        img.onerror = function(){ reject(new Error("Falha ao carregar imagem")); };
+        img.onload = function(){
+          var width = img.naturalWidth, height = img.naturalHeight;
+          if(width > maxDim || height > maxDim){
+            if(width > height){
+              height = Math.round(height * (maxDim / width));
+              width = maxDim;
+            }else{
+              width = Math.round(width * (maxDim / height));
+              height = maxDim;
+            }
+          }
+          var canvas = document.createElement("canvas");
+          canvas.width = width;
+          canvas.height = height;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0, width, height);
+          var outType = (file.type === "image/png") ? "image/png" : "image/jpeg";
+          canvas.toBlob(function(blob){
+            if(blob) resolve(blob); else reject(new Error("Falha ao gerar imagem"));
+          }, outType, quality);
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    });
+  }
+
+  function isPdfFile(f){
+    return f.type === "application/pdf" || /\.pdf$/i.test(f.name);
+  }
+
+  // ======================================================
+  // NAVEGAÇÃO ENTRE VIEWS
+  // ======================================================
+  function showView(name){
+    document.getElementById("view-dashboard").classList.toggle("active", name === "dashboard");
+    document.getElementById("view-obra").classList.toggle("active", name === "obra");
+    window.scrollTo(0,0);
+  }
+
+  function abrirObra(id){
+    currentObraId = id;
+    populateObraForm();
+    showView("obra");
+  }
+
+  function voltarPainel(){
+    currentObraId = null;
+    renderDashboard();
+    showView("dashboard");
+  }
+
+  // ======================================================
+  // CONFIGURAÇÃO GLOBAL (LOGO / ÓRGÃO)
+  // ======================================================
+  function showLogoPreview(){
+    var img = document.getElementById("logo-preview-img");
+    var placeholder = document.getElementById("logo-placeholder-text");
+    var removeBtn = document.getElementById("btn-remove-logo");
+    var topbarLogo = document.getElementById("topbar-logo");
+    if(appState.config.logoBase64){
+      img.src = appState.config.logoBase64;
+      img.style.display = "block";
+      placeholder.style.display = "none";
+      removeBtn.style.display = "inline-flex";
+      topbarLogo.src = appState.config.logoBase64;
+      topbarLogo.style.display = "block";
+    }else{
+      img.style.display = "none";
+      img.src = "";
+      placeholder.style.display = "block";
+      removeBtn.style.display = "none";
+      topbarLogo.style.display = "none";
+      topbarLogo.src = "";
+    }
+  }
+
+  function populateConfigForm(){
+    document.getElementById("input-org-nome").value = appState.config.orgName;
+    document.getElementById("input-org-subtitulo").value = appState.config.orgSubtitle;
+    document.getElementById("topbar-org-name").textContent = appState.config.orgName || "CTDO — Coordenadoria Técnica de Obras";
+    document.getElementById("topbar-org-subtitle").textContent = appState.config.orgSubtitle || "";
+    showLogoPreview();
+  }
+
+  // ======================================================
+  // PAINEL GERAL (DASHBOARD)
+  // ======================================================
+  function obraStatusClass(status){
+    if(status === "Em andamento") return "st-em-andamento";
+    if(status === "Concluída") return "st-concluida";
+    if(status === "Paralisada") return "st-paralisada";
+    return "st-a-iniciar";
+  }
+
+  function progressoObra(obra){
+    if(!obra.servicos.length) return 0;
+    var soma = obra.servicos.reduce(function(acc, s){ return acc + (Number(s.percentual) || 0); }, 0);
+    return Math.round(soma / obra.servicos.length);
+  }
+
+  function renderDashboard(){
+    var container = document.getElementById("obras-lista");
+    var emptyHint = document.getElementById("obras-empty-hint");
+
+    var lista = appState.obras.slice().sort(function(a,b){
+      return (b.updatedAt || "").localeCompare(a.updatedAt || "");
+    });
+
+    if(filtroStatusAtual !== "Todas"){
+      lista = lista.filter(function(o){ return o.status === filtroStatusAtual; });
+    }
+    if(buscaAtual.trim()){
+      var termo = buscaAtual.trim().toLowerCase();
+      lista = lista.filter(function(o){
+        return (o.nome || "").toLowerCase().indexOf(termo) > -1 ||
+               (o.endereco || "").toLowerCase().indexOf(termo) > -1;
+      });
+    }
+
+    if(lista.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      emptyHint.textContent = appState.obras.length === 0
+        ? "Nenhuma obra cadastrada ainda."
+        : "Nenhuma obra encontrada com esse filtro/busca.";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    container.innerHTML = lista.map(function(o){
+      var pct = progressoObra(o);
+      var fotosCount = o.fotos.length;
+      return (
+        '<div class="obra-card" data-obra-id="' + o.id + '">' +
+          '<div class="obra-card-top">' +
+            '<div>' +
+              '<h3>' + (escapeHtml(o.nome) || "Obra sem nome") + '</h3>' +
+              '<div class="obra-sub">' + (escapeHtml(o.endereco) || "Endereço não informado") + '</div>' +
+              '<div class="obra-sub">Resp.: ' + (escapeHtml(o.responsavel) || "—") + ' · ' + fotosCount + ' foto(s) · ' + o.projetos.length + ' projeto(s) · ' + o.arts.length + ' ART(s) · atualizado em ' + formatDateBR(o.dataRelatorio) + '</div>' +
+            '</div>' +
+            '<span class="status-chip ' + obraStatusClass(o.status) + '">' + escapeHtml(o.status) + '</span>' +
+          '</div>' +
+          '<div class="progress-track"><div class="progress-fill" style="width:' + pct + '%;"></div></div>' +
+          '<div class="progress-label"><span>Execução média dos serviços</span><span>' + pct + '%</span></div>' +
+          '<div class="obra-card-actions">' +
+            '<button type="button" class="btn btn-primary" data-action="abrir-obra" data-id="' + o.id + '">Abrir / Editar</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function criarNovaObra(){
+    var btn = document.getElementById("btn-nova-obra");
+    btn.disabled = true;
+    sb.from("obras").insert({ nome:"", status:"A iniciar", data_relatorio: todayISO() }).select().single()
+      .then(function(res){
+        btn.disabled = false;
+        if(res.error){ console.error(res.error); toast("Não foi possível criar a obra. Verifique a conexão."); return; }
+        var obra = obraRowToState(res.data);
+        appState.obras.push(obra);
+        abrirObra(obra.id);
+      });
+  }
+
+  function excluirObraAtual(){
+    var obra = getObraById(currentObraId);
+    if(!obra) return;
+    var ok = confirm('Tem certeza que deseja excluir a obra "' + (obra.nome || "sem nome") + '"? Esta ação não pode ser desfeita.');
+    if(!ok) return;
+
+    var paths = obra.fotos.map(function(f){ return f.storagePath; })
+      .concat(obra.projetos.map(function(p){ return p.storagePath; }))
+      .concat(obra.arts.map(function(a){ return a.storagePath; }))
+      .filter(Boolean);
+
+    sb.from("obras").delete().eq("id", obra.id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível excluir a obra."); return; }
+      appState.obras = appState.obras.filter(function(o){ return o.id !== obra.id; });
+      voltarPainel();
+      toast("Obra excluída.");
+      if(paths.length) sb.storage.from(window.SUPABASE_BUCKET).remove(paths);
+    });
+  }
+
+  // ======================================================
+  // FORMULÁRIO DA OBRA
+  // ======================================================
+  function populateObraForm(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    document.getElementById("input-obra-nome").value = o.nome;
+    document.getElementById("input-obra-endereco").value = o.endereco;
+    document.getElementById("input-obra-responsavel").value = o.responsavel;
+    document.getElementById("input-obra-art").value = o.contratoArt;
+    document.getElementById("input-obra-drive").value = o.driveFolder || "";
+    renderDrive();
+    document.getElementById("input-obra-status").value = o.status;
+    document.getElementById("input-obra-data").value = o.dataRelatorio;
+    document.getElementById("input-cab-motivo").value = o.cabecalho.motivo;
+    document.getElementById("input-cab-observacao").value = o.cabecalho.observacao;
+    document.getElementById("input-observacoes-gerais").value = o.observacoesGerais;
+
+    renderServicos();
+    renderFotos();
+    renderProjetos();
+    renderArts();
+    renderCronograma();
+    renderMateriais();
+  }
+
+  // ---------- SERVIÇOS ----------
+  function statusClass(status){
+    if(status === "Em andamento") return "st-em-andamento";
+    if(status === "Concluído") return "st-concluido";
+    return "st-a-executar";
+  }
+
+  function labelForServico(servico, index){
+    var desc = (servico.descricao || "").trim();
+    var base = "Serviço " + (index + 1);
+    if(desc){
+      base += ": " + (desc.length > 30 ? desc.slice(0,30) + "…" : desc);
+    }
+    return base;
+  }
+
+  function renderServicos(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var container = document.getElementById("servicos-lista");
+    var emptyHint = document.getElementById("servicos-empty-hint");
+
+    if(o.servicos.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    container.innerHTML = o.servicos.map(function(s, i){
+      return (
+        '<div class="servico-card" data-servico-id="' + s.id + '">' +
+          '<div class="servico-card-header">' +
+            '<span class="servico-numero">Serviço ' + (i+1) + '</span>' +
+            '<button type="button" class="btn-icon-remove" data-action="remove-servico" data-id="' + s.id + '" aria-label="Remover serviço">Remover</button>' +
+          '</div>' +
+          '<label>' +
+            '<span class="label-text">Descrição do serviço</span>' +
+            '<textarea data-field="descricao" data-id="' + s.id + '" rows="2" placeholder="Descreva o serviço a ser executado">' + escapeHtml(s.descricao) + '</textarea>' +
+          '</label>' +
+          '<div class="status-row">' +
+            '<label>' +
+              '<span class="label-text">Status</span>' +
+              '<select data-field="status" data-id="' + s.id + '">' +
+                '<option value="A executar"' + (s.status === "A executar" ? " selected" : "") + '>A executar</option>' +
+                '<option value="Em andamento"' + (s.status === "Em andamento" ? " selected" : "") + '>Em andamento</option>' +
+                '<option value="Concluído"' + (s.status === "Concluído" ? " selected" : "") + '>Concluído</option>' +
+              '</select>' +
+              '<span class="status-chip ' + statusClass(s.status) + '">' + escapeHtml(s.status) + '</span>' +
+            '</label>' +
+            '<label>' +
+              '<span class="label-text">% concluído</span>' +
+              '<input type="number" min="0" max="100" data-field="percentual" data-id="' + s.id + '" value="' + (Number(s.percentual) || 0) + '">' +
+            '</label>' +
+          '</div>' +
+          '<label style="margin-bottom:0;">' +
+            '<span class="label-text">Observações</span>' +
+            '<textarea data-field="observacoes" data-id="' + s.id + '" rows="2" placeholder="Observações sobre este serviço">' + escapeHtml(s.observacoes) + '</textarea>' +
+          '</label>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function addServico(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    sb.from("servicos").insert({
+      obra_id:o.id, ordem:o.servicos.length, descricao:"", status:"A executar", percentual:0, observacoes:""
+    }).select().single().then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível adicionar o serviço."); return; }
+      o.servicos.push(servicoRowToState(res.data));
+      tocarUpdatedAt(o);
+      renderServicos();
+      renderFotos();
+      renderCronograma();
+      renderMateriais();
+    });
+  }
+
+  function removeServico(id){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    sb.from("servicos").delete().eq("id", id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível remover o serviço."); return; }
+      o.servicos = o.servicos.filter(function(s){ return s.id !== id; });
+      o.fotos.forEach(function(f){ if(f.servicoId === id) f.servicoId = ""; });
+      o.materiais.forEach(function(m){ if(m.servicoId === id) m.servicoId = ""; });
+      tocarUpdatedAt(o);
+      renderServicos();
+      renderFotos();
+      renderCronograma();
+      renderMateriais();
+    });
+  }
+
+  var SERVICO_DB_FIELD = {
+    descricao:"descricao", status:"status", observacoes:"observacoes",
+    dataInicioPrevista:"data_inicio_prevista", dataFimPrevista:"data_fim_prevista",
+    dataInicioReal:"data_inicio_real", dataFimReal:"data_fim_real"
+  };
+  var CAMPOS_DATA_SERVICO = ["dataInicioPrevista","dataFimPrevista","dataInicioReal","dataFimReal"];
+
+  function updateServicoField(id, field, value){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var servico = o.servicos.find(function(s){ return s.id === id; });
+    if(!servico) return;
+    var payload = {};
+    if(field === "percentual"){
+      var n = parseInt(value, 10);
+      if(isNaN(n)) n = 0;
+      n = Math.max(0, Math.min(100, n));
+      servico.percentual = n;
+      payload.percentual = n;
+    }else{
+      servico[field] = value;
+      var dbField = SERVICO_DB_FIELD[field];
+      if(dbField){
+        var isDate = CAMPOS_DATA_SERVICO.indexOf(field) > -1;
+        payload[dbField] = (isDate && value === "") ? null : value;
+      }
+    }
+    tocarUpdatedAt(o);
+    debouncedUpdate("servicos", id, payload);
+  }
+
+  function refreshStatusChip(id, status){
+    var card = document.querySelector('.servico-card[data-servico-id="' + id + '"]');
+    if(!card) return;
+    var chip = card.querySelector(".status-chip");
+    if(chip){
+      chip.textContent = status;
+      chip.className = "status-chip " + statusClass(status);
+    }
+  }
+
+  function refreshFotoServicoLabels(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var selects = document.querySelectorAll(".foto-servico-select");
+    selects.forEach(function(sel){
+      Array.prototype.forEach.call(sel.options, function(opt){
+        if(opt.value){
+          var idx = o.servicos.findIndex(function(s){ return s.id === opt.value; });
+          if(idx > -1){
+            opt.textContent = labelForServico(o.servicos[idx], idx);
+          }
+        }
+      });
+    });
+  }
+
+  // ---------- FOTOS ----------
+  function renderFotos(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var container = document.getElementById("fotos-grid");
+    var emptyHint = document.getElementById("fotos-empty-hint");
+
+    if(o.fotos.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    var servicoOptions = o.servicos.map(function(s, i){
+      return { id: s.id, label: labelForServico(s, i) };
+    });
+
+    container.innerHTML = o.fotos.map(function(f){
+      var optionsHtml = '<option value="">Nenhum</option>' + servicoOptions.map(function(opt){
+        return '<option value="' + opt.id + '"' + (opt.id === f.servicoId ? " selected" : "") + '>' + escapeHtml(opt.label) + '</option>';
+      }).join("");
+
+      return (
+        '<div class="foto-card" data-foto-id="' + f.id + '">' +
+          '<img class="foto-thumb" src="' + f.dataUrl + '" alt="' + (escapeHtml(f.legenda) || "Foto da obra") + '" loading="lazy">' +
+          '<button type="button" class="btn-icon-remove" data-action="remove-foto" data-id="' + f.id + '" aria-label="Remover foto" style="margin-bottom:8px;">Remover</button>' +
+          '<label>' +
+            '<span class="label-text">Legenda / descrição</span>' +
+            '<input type="text" data-field="legenda" data-id="' + f.id + '" value="' + escapeHtml(f.legenda) + '" placeholder="Descreva a foto">' +
+          '</label>' +
+          '<div class="foto-meta-grid">' +
+            '<label>' +
+              '<span class="label-text">Data</span>' +
+              '<input type="date" data-field="data" data-id="' + f.id + '" value="' + escapeHtml(f.data) + '">' +
+            '</label>' +
+            '<label>' +
+              '<span class="label-text">% execução</span>' +
+              '<input type="number" min="0" max="100" data-field="percentual" data-id="' + f.id + '" value="' + (Number(f.percentual) || 0) + '">' +
+            '</label>' +
+          '</div>' +
+          '<label style="margin-bottom:0;">' +
+            '<span class="label-text">Vincular a serviço</span>' +
+            '<select class="foto-servico-select" data-field="servicoId" data-id="' + f.id + '">' + optionsHtml + '</select>' +
+          '</label>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function handleFotosInput(fileList){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var files = Array.prototype.slice.call(fileList || []);
+    if(files.length === 0) return;
+    toast("Enviando " + files.length + " foto(s)...");
+
+    Promise.all(files.map(function(file, idx){
+      return compressImage(file, 1280, 0.72).then(function(blob){
+        var path = "fotos/" + o.id + "/" + generateId() + ".jpg";
+        return sb.storage.from(window.SUPABASE_BUCKET).upload(path, blob, { contentType:"image/jpeg" })
+          .then(function(uploadRes){
+            if(uploadRes.error) throw uploadRes.error;
+            return sb.from("fotos").insert({
+              obra_id:o.id, storage_path:path, legenda:"", data:o.dataRelatorio || todayISO(),
+              percentual:0, servico_id:null, ordem:o.fotos.length + idx
+            }).select().single();
+          });
+      });
+    })).then(function(results){
+      var falhas = 0;
+      results.forEach(function(res){
+        if(res.error){ falhas++; console.error(res.error); return; }
+        o.fotos.push(fotoRowToState(res.data));
+      });
+      tocarUpdatedAt(o);
+      renderFotos();
+      if(falhas){
+        toast(falhas + " foto(s) não puderam ser enviadas.");
+      }else{
+        toast("Foto(s) adicionada(s).");
+        if(o.fotos.length > 15){
+          toast("Você anexou mais de 15 fotos. Para melhor desempenho, remova fotos que não sejam essenciais.");
+        }
+      }
+    }).catch(function(err){
+      console.error(err);
+      toast("Não foi possível enviar uma ou mais fotos. Verifique a conexão.");
+    });
+  }
+
+  function removeFoto(id){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var item = o.fotos.find(function(f){ return f.id === id; });
+    if(!item) return;
+    sb.from("fotos").delete().eq("id", id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível remover a foto."); return; }
+      o.fotos = o.fotos.filter(function(f){ return f.id !== id; });
+      tocarUpdatedAt(o);
+      renderFotos();
+      if(item.storagePath) sb.storage.from(window.SUPABASE_BUCKET).remove([item.storagePath]);
+    });
+  }
+
+  var FOTO_DB_FIELD = { legenda:"legenda", data:"data", percentual:"percentual", servicoId:"servico_id" };
+
+  function updateFotoField(id, field, value){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var foto = o.fotos.find(function(f){ return f.id === id; });
+    if(!foto) return;
+    var payload = {};
+    if(field === "percentual"){
+      var n = parseInt(value, 10);
+      if(isNaN(n)) n = 0;
+      n = Math.max(0, Math.min(100, n));
+      foto.percentual = n;
+      payload.percentual = n;
+    }else{
+      foto[field] = value;
+      var dbField = FOTO_DB_FIELD[field];
+      if(dbField) payload[dbField] = (field === "servicoId" && value === "") ? null : value;
+    }
+    tocarUpdatedAt(o);
+    debouncedUpdate("fotos", id, payload);
+  }
+
+  // ---------- PROJETOS (PDFs) ----------
+  var CATEGORIAS_PROJETO = ["Planta baixa","Situação/Implantação","Corte","Elétrico","Hidráulico","Estrutural","Memorial descritivo","Outro"];
+
+  function renderProjetos(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var container = document.getElementById("projetos-lista");
+    var emptyHint = document.getElementById("projetos-empty-hint");
+
+    if(o.projetos.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    container.innerHTML = o.projetos.map(function(p){
+      var optionsHtml = CATEGORIAS_PROJETO.map(function(c){
+        return '<option value="' + c + '"' + (c === p.categoria ? " selected" : "") + '>' + c + '</option>';
+      }).join("");
+      return (
+        '<div class="projeto-card" data-projeto-id="' + p.id + '">' +
+          '<div class="projeto-icon">PDF</div>' +
+          '<div class="projeto-info">' +
+            '<label style="margin-bottom:8px;">' +
+              '<span class="label-text">Nome do projeto</span>' +
+              '<input type="text" data-field="nome" data-id="' + p.id + '" value="' + escapeHtml(p.nome) + '" placeholder="Ex.: Planta baixa - pavimento térreo">' +
+            '</label>' +
+            '<label style="margin-bottom:0;">' +
+              '<span class="label-text">Categoria</span>' +
+              '<select data-field="categoria" data-id="' + p.id + '">' + optionsHtml + '</select>' +
+            '</label>' +
+            '<div class="projeto-meta">' + escapeHtml(p.fileName) + ' · ' + formatFileSize(p.fileSize) + ' · anexado em ' + formatDateBR(p.dataUpload) + '</div>' +
+          '</div>' +
+          '<div class="projeto-actions">' +
+            '<button type="button" class="btn btn-secondary" data-action="abrir-projeto" data-id="' + p.id + '">Abrir / Baixar</button>' +
+            '<button type="button" class="btn-icon-remove" data-action="remove-projeto" data-id="' + p.id + '">Remover</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function formatFileSize(bytes){
+    if(!bytes) return "0 KB";
+    if(bytes < 1024*1024) return Math.round(bytes/1024) + " KB";
+    return (bytes/(1024*1024)).toFixed(1) + " MB";
+  }
+
+  function handleProjetosInput(fileList){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var files = Array.prototype.slice.call(fileList || []);
+    var validos = files.filter(function(f){
+      var ok = isPdfFile(f);
+      if(!ok) toast('Arquivo "' + f.name + '" ignorado: apenas PDF é aceito.');
+      return ok;
+    });
+    if(validos.length === 0) return;
+
+    toast("Enviando " + validos.length + " projeto(s)...");
+    Promise.all(validos.map(function(file){
+      var path = "projetos/" + o.id + "/" + generateId() + "-" + sanitizeFileName(file.name);
+      return sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { contentType:"application/pdf" })
+        .then(function(uploadRes){
+          if(uploadRes.error) throw uploadRes.error;
+          return sb.from("projetos").insert({
+            obra_id:o.id, nome:file.name.replace(/\.pdf$/i, ""), categoria:"Outro",
+            storage_path:path, file_name:file.name, file_size:file.size, data_upload: todayISO()
+          }).select().single();
+        });
+    })).then(function(results){
+      var falhas = 0;
+      results.forEach(function(res){
+        if(res.error){ falhas++; console.error(res.error); return; }
+        o.projetos.push(projetoRowToState(res.data));
+      });
+      tocarUpdatedAt(o);
+      renderProjetos();
+      toast(falhas ? (falhas + " arquivo(s) não puderam ser enviados.") : "Projeto(s) anexado(s).");
+    }).catch(function(err){
+      console.error(err);
+      toast("Não foi possível salvar um ou mais arquivos. Verifique a conexão.");
+    });
+  }
+
+  function updateProjetoField(id, field, value){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var projeto = o.projetos.find(function(p){ return p.id === id; });
+    if(!projeto) return;
+    projeto[field] = value;
+    tocarUpdatedAt(o);
+    debouncedUpdate("projetos", id, { nome: field === "nome" ? value : projeto.nome, categoria: field === "categoria" ? value : projeto.categoria });
+  }
+
+  function removeProjeto(id){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var item = o.projetos.find(function(p){ return p.id === id; });
+    if(!item) return;
+    var ok = confirm("Remover este projeto anexado?");
+    if(!ok) return;
+    sb.from("projetos").delete().eq("id", id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível remover o projeto."); return; }
+      o.projetos = o.projetos.filter(function(p){ return p.id !== id; });
+      tocarUpdatedAt(o);
+      renderProjetos();
+      if(item.storagePath) sb.storage.from(window.SUPABASE_BUCKET).remove([item.storagePath]);
+    });
+  }
+
+  // ---------- ARTs / RRTs (PDFs) ----------
+  var TIPOS_ART = ["Projeto","Execução","Fiscalização","Outro"];
+
+  function renderArts(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var container = document.getElementById("arts-lista");
+    var emptyHint = document.getElementById("arts-empty-hint");
+
+    if(o.arts.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    container.innerHTML = o.arts.map(function(a){
+      var optionsHtml = TIPOS_ART.map(function(t){
+        return '<option value="' + t + '"' + (t === a.tipo ? " selected" : "") + '>' + t + '</option>';
+      }).join("");
+      return (
+        '<div class="projeto-card" data-art-id="' + a.id + '">' +
+          '<div class="projeto-icon art-icon">ART</div>' +
+          '<div class="projeto-info">' +
+            '<div class="form-grid-2">' +
+              '<label style="margin-bottom:8px;">' +
+                '<span class="label-text">Número da ART/RRT</span>' +
+                '<input type="text" data-field="numero" data-id="' + a.id + '" value="' + escapeHtml(a.numero) + '" placeholder="Ex.: MT20260012345">' +
+              '</label>' +
+              '<label style="margin-bottom:8px;">' +
+                '<span class="label-text">Tipo</span>' +
+                '<select data-field="tipo" data-id="' + a.id + '">' + optionsHtml + '</select>' +
+              '</label>' +
+            '</div>' +
+            '<div class="form-grid-2">' +
+              '<label style="margin-bottom:8px;">' +
+                '<span class="label-text">Responsável técnico</span>' +
+                '<input type="text" data-field="responsavel" data-id="' + a.id + '" value="' + escapeHtml(a.responsavel) + '" placeholder="Nome do profissional">' +
+              '</label>' +
+              '<label style="margin-bottom:8px;">' +
+                '<span class="label-text">CREA/CAU</span>' +
+                '<input type="text" data-field="crea" data-id="' + a.id + '" value="' + escapeHtml(a.crea) + '" placeholder="Nº do registro">' +
+              '</label>' +
+            '</div>' +
+            '<label style="margin-bottom:0;">' +
+              '<span class="label-text">Data de emissão</span>' +
+              '<input type="date" data-field="dataEmissao" data-id="' + a.id + '" value="' + escapeHtml(a.dataEmissao) + '">' +
+            '</label>' +
+            '<div class="projeto-meta">' + escapeHtml(a.fileName) + ' · ' + formatFileSize(a.fileSize) + ' · anexado em ' + formatDateBR(a.dataUpload) + '</div>' +
+          '</div>' +
+          '<div class="projeto-actions">' +
+            '<button type="button" class="btn btn-secondary" data-action="abrir-art" data-id="' + a.id + '">Abrir / Baixar</button>' +
+            '<button type="button" class="btn-icon-remove" data-action="remove-art" data-id="' + a.id + '">Remover</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function handleArtsInput(fileList){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var files = Array.prototype.slice.call(fileList || []);
+    var validos = files.filter(function(f){
+      var ok = isPdfFile(f);
+      if(!ok) toast('Arquivo "' + f.name + '" ignorado: apenas PDF é aceito.');
+      return ok;
+    });
+    if(validos.length === 0) return;
+
+    toast("Enviando " + validos.length + " ART(s)...");
+    Promise.all(validos.map(function(file){
+      var path = "arts/" + o.id + "/" + generateId() + "-" + sanitizeFileName(file.name);
+      return sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { contentType:"application/pdf" })
+        .then(function(uploadRes){
+          if(uploadRes.error) throw uploadRes.error;
+          return sb.from("arts").insert({
+            obra_id:o.id, numero:"", tipo:"Projeto", responsavel:"", crea:"",
+            data_emissao: todayISO(), storage_path:path, file_name:file.name, file_size:file.size,
+            data_upload: todayISO()
+          }).select().single();
+        });
+    })).then(function(results){
+      var falhas = 0;
+      results.forEach(function(res){
+        if(res.error){ falhas++; console.error(res.error); return; }
+        o.arts.push(artRowToState(res.data));
+      });
+      tocarUpdatedAt(o);
+      renderArts();
+      toast(falhas ? (falhas + " arquivo(s) não puderam ser enviados.") : "ART(s) anexada(s).");
+    }).catch(function(err){
+      console.error(err);
+      toast("Não foi possível salvar um ou mais arquivos. Verifique a conexão.");
+    });
+  }
+
+  var ART_DB_FIELD = { numero:"numero", tipo:"tipo", responsavel:"responsavel", crea:"crea", dataEmissao:"data_emissao" };
+
+  function updateArtField(id, field, value){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var art = o.arts.find(function(a){ return a.id === id; });
+    if(!art) return;
+    art[field] = value;
+    var dbField = ART_DB_FIELD[field];
+    var payload = {};
+    if(dbField) payload[dbField] = (field === "dataEmissao" && value === "") ? null : value;
+    tocarUpdatedAt(o);
+    debouncedUpdate("arts", id, payload);
+  }
+
+  function removeArt(id){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var item = o.arts.find(function(a){ return a.id === id; });
+    if(!item) return;
+    var ok = confirm("Remover esta ART anexada?");
+    if(!ok) return;
+    sb.from("arts").delete().eq("id", id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível remover a ART."); return; }
+      o.arts = o.arts.filter(function(a){ return a.id !== id; });
+      tocarUpdatedAt(o);
+      renderArts();
+      if(item.storagePath) sb.storage.from(window.SUPABASE_BUCKET).remove([item.storagePath]);
+    });
+  }
+
+  function abrirArquivo(item){
+    if(!item || !item.storagePath){ toast("Arquivo não encontrado."); return; }
+    window.open(publicUrl(item.storagePath), "_blank");
+  }
+
+  // ---------- CRONOGRAMA (reaproveita os Serviços, com datas) ----------
+  function parseISODate(iso){
+    if(!iso) return null;
+    var d = new Date(iso + "T00:00:00");
+    return isNaN(d.getTime()) ? null : d;
+  }
+
+  function diasEntre(isoA, isoB){
+    var a = parseISODate(isoA), b = parseISODate(isoB);
+    if(!a || !b) return null;
+    return (b - a) / 86400000;
+  }
+
+  function computeGanttRange(servicos){
+    var datas = [];
+    servicos.forEach(function(s){
+      [s.dataInicioPrevista, s.dataFimPrevista, s.dataInicioReal, s.dataFimReal].forEach(function(d){
+        if(d) datas.push(d);
+      });
+    });
+    if(datas.length === 0) return null;
+    datas.sort();
+    var min = datas[0], max = datas[datas.length - 1];
+    if(min === max) return null;
+    return { min: min, max: max };
+  }
+
+  function barPosStyle(range, inicio, fim){
+    if(!inicio || !fim) return null;
+    var total = diasEntre(range.min, range.max);
+    if(!total || total <= 0) return null;
+    var left = diasEntre(range.min, inicio);
+    var largura = diasEntre(inicio, fim);
+    if(left === null || largura === null) return null;
+    left = Math.max(0, left / total * 100);
+    largura = Math.max(1.2, largura / total * 100);
+    if(left + largura > 100) largura = 100 - left;
+    return "left:" + left.toFixed(2) + "%;width:" + largura.toFixed(2) + "%;";
+  }
+
+  function renderCronograma(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var container = document.getElementById("cronograma-lista");
+    var emptyHint = document.getElementById("cronograma-empty-hint");
+
+    if(o.servicos.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    var range = computeGanttRange(o.servicos);
+    var hoje = todayISO();
+
+    container.innerHTML = o.servicos.map(function(s, i){
+      var previstoStyle = range ? barPosStyle(range, s.dataInicioPrevista, s.dataFimPrevista) : null;
+
+      var realFim = s.dataFimReal || ((Number(s.percentual) || 0) < 100 ? hoje : s.dataInicioReal);
+      var realStyle = (range && s.dataInicioReal) ? barPosStyle(range, s.dataInicioReal, realFim) : null;
+
+      var realClass = "real-andamento";
+      var concluido = (Number(s.percentual) || 0) >= 100;
+      var atrasadoPrazo = s.dataFimPrevista && hoje > s.dataFimPrevista && !concluido;
+      if(concluido && s.dataFimReal && s.dataFimPrevista){
+        realClass = (s.dataFimReal <= s.dataFimPrevista) ? "real-ok" : "real-atrasado";
+      }else if(atrasadoPrazo){
+        realClass = "real-atrasado";
+      }else if(concluido){
+        realClass = "real-ok";
+      }
+
+      var trackHtml = (previstoStyle || realStyle)
+        ? '<div class="gantt-track">' +
+            (previstoStyle ? '<div class="gantt-bar previsto" style="' + previstoStyle + '"></div>' : "") +
+            (realStyle ? '<div class="gantt-bar ' + realClass + '" style="' + realStyle + '"></div>' : "") +
+          '</div>'
+        : '<p class="gantt-caption">Informe as datas previstas para visualizar a linha do tempo.</p>';
+
+      return (
+        '<div class="cronograma-item" data-servico-id="' + s.id + '">' +
+          '<div class="cronograma-item-header">' +
+            '<h4>' + labelForServico(s, i) + '</h4>' +
+            '<span class="status-chip ' + statusClass(s.status) + '">' + escapeHtml(s.status) + ' · ' + (Number(s.percentual)||0) + '%</span>' +
+          '</div>' +
+          '<div class="cronograma-dates-grid">' +
+            '<label>' +
+              '<span class="label-text">Início previsto</span>' +
+              '<input type="date" data-field="dataInicioPrevista" data-id="' + s.id + '" value="' + escapeHtml(s.dataInicioPrevista) + '">' +
+            '</label>' +
+            '<label>' +
+              '<span class="label-text">Fim previsto</span>' +
+              '<input type="date" data-field="dataFimPrevista" data-id="' + s.id + '" value="' + escapeHtml(s.dataFimPrevista) + '">' +
+            '</label>' +
+          '</div>' +
+          '<div class="cronograma-dates-grid">' +
+            '<label style="margin-bottom:0;">' +
+              '<span class="label-text">Início real</span>' +
+              '<input type="date" data-field="dataInicioReal" data-id="' + s.id + '" value="' + escapeHtml(s.dataInicioReal) + '">' +
+            '</label>' +
+            '<label style="margin-bottom:0;">' +
+              '<span class="label-text">Fim real</span>' +
+              '<input type="date" data-field="dataFimReal" data-id="' + s.id + '" value="' + escapeHtml(s.dataFimReal) + '">' +
+            '</label>' +
+          '</div>' +
+          trackHtml +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  // ---------- MATERIAIS ----------
+  var STATUS_MATERIAL = ["Especificado","Aprovado","Em aplicação","Aplicado"];
+  var MATERIAL_DB_FIELD = {
+    descricao:"descricao", unidade:"unidade", quantidadePrevista:"quantidade_prevista",
+    quantidadeAplicada:"quantidade_aplicada", especificacao:"especificacao", status:"status", servicoId:"servico_id"
+  };
+
+  function renderMateriais(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var container = document.getElementById("materiais-lista");
+    var emptyHint = document.getElementById("materiais-empty-hint");
+
+    if(o.materiais.length === 0){
+      container.innerHTML = "";
+      emptyHint.style.display = "block";
+      return;
+    }
+    emptyHint.style.display = "none";
+
+    var servicoOptions = o.servicos.map(function(s, i){ return { id: s.id, label: labelForServico(s, i) }; });
+
+    container.innerHTML = o.materiais.map(function(m, i){
+      var statusOptions = STATUS_MATERIAL.map(function(st){
+        return '<option value="' + st + '"' + (st === m.status ? " selected" : "") + '>' + st + '</option>';
+      }).join("");
+      var vinculoOptions = '<option value="">Nenhum</option>' + servicoOptions.map(function(opt){
+        return '<option value="' + opt.id + '"' + (opt.id === m.servicoId ? " selected" : "") + '>' + escapeHtml(opt.label) + '</option>';
+      }).join("");
+
+      return (
+        '<div class="servico-card" data-material-id="' + m.id + '">' +
+          '<div class="servico-card-header">' +
+            '<span class="servico-numero">Material ' + (i+1) + '</span>' +
+            '<button type="button" class="btn-icon-remove" data-action="remove-material" data-id="' + m.id + '" aria-label="Remover material">Remover</button>' +
+          '</div>' +
+          '<label>' +
+            '<span class="label-text">Descrição do material</span>' +
+            '<textarea data-field="descricao" data-id="' + m.id + '" rows="2" placeholder="Ex.: Piso cerâmico esmaltado PEI 5">' + escapeHtml(m.descricao) + '</textarea>' +
+          '</label>' +
+          '<div class="form-grid-2">' +
+            '<label>' +
+              '<span class="label-text">Unidade</span>' +
+              '<input type="text" data-field="unidade" data-id="' + m.id + '" value="' + escapeHtml(m.unidade) + '" placeholder="un, m², m³, kg...">' +
+            '</label>' +
+            '<label>' +
+              '<span class="label-text">Status</span>' +
+              '<select data-field="status" data-id="' + m.id + '">' + statusOptions + '</select>' +
+            '</label>' +
+          '</div>' +
+          '<div class="form-grid-2">' +
+            '<label>' +
+              '<span class="label-text">Quantidade prevista</span>' +
+              '<input type="number" min="0" step="any" data-field="quantidadePrevista" data-id="' + m.id + '" value="' + (m.quantidadePrevista === "" ? "" : Number(m.quantidadePrevista)) + '">' +
+            '</label>' +
+            '<label>' +
+              '<span class="label-text">Quantidade aplicada</span>' +
+              '<input type="number" min="0" step="any" data-field="quantidadeAplicada" data-id="' + m.id + '" value="' + (m.quantidadeAplicada === "" ? "" : Number(m.quantidadeAplicada)) + '">' +
+            '</label>' +
+          '</div>' +
+          '<label>' +
+            '<span class="label-text">Especificação técnica (marca/modelo/norma)</span>' +
+            '<textarea data-field="especificacao" data-id="' + m.id + '" rows="2" placeholder="Ex.: Portobello, ref. XX, NBR 13818">' + escapeHtml(m.especificacao) + '</textarea>' +
+          '</label>' +
+          '<label style="margin-bottom:0;">' +
+            '<span class="label-text">Vincular a serviço</span>' +
+            '<select data-field="servicoId" data-id="' + m.id + '">' + vinculoOptions + '</select>' +
+          '</label>' +
+        '</div>'
+      );
+    }).join("");
+  }
+
+  function addMaterial(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    sb.from("materiais").insert({
+      obra_id:o.id, descricao:"", unidade:"", quantidade_prevista:null, quantidade_aplicada:null,
+      especificacao:"", status:"Especificado", servico_id:null
+    }).select().single().then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível adicionar o material."); return; }
+      o.materiais.push(materialRowToState(res.data));
+      tocarUpdatedAt(o);
+      renderMateriais();
+    });
+  }
+
+  function removeMaterial(id){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    sb.from("materiais").delete().eq("id", id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível remover o material."); return; }
+      o.materiais = o.materiais.filter(function(m){ return m.id !== id; });
+      tocarUpdatedAt(o);
+      renderMateriais();
+    });
+  }
+
+  function updateMaterialField(id, field, value){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var material = o.materiais.find(function(m){ return m.id === id; });
+    if(!material) return;
+    var payload = {};
+    if(field === "quantidadePrevista" || field === "quantidadeAplicada"){
+      var v = (value === "") ? "" : Math.max(0, Number(value) || 0);
+      material[field] = v;
+      payload[MATERIAL_DB_FIELD[field]] = (v === "") ? null : v;
+    }else{
+      material[field] = value;
+      var dbField = MATERIAL_DB_FIELD[field];
+      if(dbField) payload[dbField] = (field === "servicoId" && value === "") ? null : value;
+    }
+    tocarUpdatedAt(o);
+    debouncedUpdate("materiais", id, payload);
+  }
+
+  // ---------- VALIDAÇÃO ----------
+  function validarCampos(o){
+    var missing = [];
+    if(!o.nome.trim()) missing.push("Nome da obra");
+    if(!o.responsavel.trim()) missing.push("Responsável técnico");
+    if(!o.dataRelatorio) missing.push("Data do relatório");
+    return { valid: missing.length === 0, missing: missing };
+  }
+
+  // ======================================================
+  // MONTAGEM DO RELATÓRIO (HTML) — POR OBRA
+  // ======================================================
+  function labelForServicoById(o, id){
+    var idx = o.servicos.findIndex(function(s){ return s.id === id; });
+    if(idx === -1) return "";
+    return labelForServico(o.servicos[idx], idx);
+  }
+
+  function buildHeaderTable(isWord){
+    var cfg = appState.config;
+    var headerLogo = "";
+    if(cfg.logoBase64){
+      headerLogo = isWord
+        ? '<img src="' + cfg.logoBase64 + '" width="80" style="width:80px;display:block;">'
+        : '<img src="' + cfg.logoBase64 + '" style="max-width:90px;max-height:90px;display:block;">';
+    }
+    return (
+      '<table style="width:100%;border-bottom:3px solid #0F2A43;padding-bottom:10px;margin-bottom:14px;">' +
+        '<tr>' +
+          '<td style="width:100px;vertical-align:middle;">' + headerLogo + '</td>' +
+          '<td style="vertical-align:middle;">' +
+            '<div style="font-size:16px;font-weight:bold;color:#0F2A43;">' + (escapeHtml(cfg.orgName) || "&nbsp;") + '</div>' +
+            '<div style="font-size:12px;color:#5B6B7A;">' + (escapeHtml(cfg.orgSubtitle) || "Relatório de Obra") + '</div>' +
+          '</td>' +
+        '</tr>' +
+      '</table>'
+    );
+  }
+
+  function buildReportHTML(o, mode){
+    var isWord = (mode === "word");
+
+    var headerTable = buildHeaderTable(isWord);
+
+    var motivoLine = o.cabecalho.motivo
+      ? '<div style="margin-bottom:6px;font-size:13px;"><strong>Motivo desta visita:</strong> ' + escapeHtml(o.cabecalho.motivo) + '</div>'
+      : "";
+    var obsCabLine = o.cabecalho.observacao
+      ? '<div style="margin-bottom:16px;font-size:13px;"><strong>Observação:</strong> ' + escapeHtml(o.cabecalho.observacao) + '</div>'
+      : "";
+
+    var identificacaoTable =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">1. Identificação da obra</h2>' +
+      '<table style="width:100%;font-size:13px;margin-bottom:16px;border-collapse:collapse;">' +
+        '<tr><td style="padding:4px 0;width:170px;color:#5B6B7A;">Nome da obra</td><td style="padding:4px 0;font-weight:bold;">' + (escapeHtml(o.nome) || "&nbsp;") + '</td></tr>' +
+        '<tr><td style="padding:4px 0;color:#5B6B7A;">Endereço/Localização</td><td style="padding:4px 0;">' + (escapeHtml(o.endereco) || "&nbsp;") + '</td></tr>' +
+        '<tr><td style="padding:4px 0;color:#5B6B7A;">Responsável técnico</td><td style="padding:4px 0;">' + (escapeHtml(o.responsavel) || "&nbsp;") + '</td></tr>' +
+        '<tr><td style="padding:4px 0;color:#5B6B7A;">Contrato/ART</td><td style="padding:4px 0;">' + (escapeHtml(o.contratoArt) || "&nbsp;") + '</td></tr>' +
+      (driveFolderId(o.driveFolder) ? '<tr><td style="padding:4px 0;color:#5B6B7A;">Pasta no Drive</td><td style="padding:4px 0;">https://drive.google.com/drive/folders/' + escapeHtml(driveFolderId(o.driveFolder)) + '</td></tr>' : '') +
+        '<tr><td style="padding:4px 0;color:#5B6B7A;">Status da obra</td><td style="padding:4px 0;">' + escapeHtml(o.status) + '</td></tr>' +
+        '<tr><td style="padding:4px 0;color:#5B6B7A;">Data deste relatório</td><td style="padding:4px 0;">' + (formatDateBR(o.dataRelatorio) || "&nbsp;") + '</td></tr>' +
+      '</table>';
+
+    var servicosRows = o.servicos.length
+      ? o.servicos.map(function(sv, i){
+          return '<tr>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (i+1) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(sv.descricao) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(sv.status) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (Number(sv.percentual)||0) + '%</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(sv.observacoes) || "&nbsp;") + '</td>' +
+          '</tr>';
+        }).join("")
+      : '<tr><td colspan="5" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhum serviço informado.</td></tr>';
+
+    var servicosTable =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">2. Serviços a executar</h2>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">' +
+        '<thead><tr style="background:#EEF1F4;">' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">#</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Descrição</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Status</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">%</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Observações</th>' +
+        '</tr></thead>' +
+        '<tbody>' + servicosRows + '</tbody>' +
+      '</table>';
+
+    function fotoMeta(f){
+      var vinculo = f.servicoId ? (' · Serviço: ' + escapeHtml(labelForServicoById(o, f.servicoId))) : "";
+      return 'Data: ' + (formatDateBR(f.data) || "&nbsp;") + ' · % execução: ' + (Number(f.percentual)||0) + '%' + vinculo;
+    }
+
+    var fotosBlock;
+    if(o.fotos.length === 0){
+      fotosBlock = '<p style="font-size:12px;color:#5B6B7A;">Nenhuma foto anexada.</p>';
+    }else if(isWord){
+      var colWidthWord = 330;
+      var paresWord = chunk(o.fotos, 2);
+      fotosBlock = '<table style="width:' + (colWidthWord*2 + 24) + 'px;border-collapse:collapse;">' + paresWord.map(function(par){
+        var cells = par.map(function(f){
+          return '<td width="' + colWidthWord + '" style="width:' + colWidthWord + 'px;padding:8px;vertical-align:top;border:1px solid #D7DEE3;">' +
+            '<img src="' + f.dataUrl + '" width="' + (colWidthWord - 16) + '" style="width:' + (colWidthWord - 16) + 'px;display:block;margin-bottom:4px;">' +
+            '<div style="font-size:11px;color:#1c2b36;"><strong>' + (escapeHtml(f.legenda) || "Sem legenda") + '</strong></div>' +
+            '<div style="font-size:10px;color:#5B6B7A;">' + fotoMeta(f) + '</div>' +
+          '</td>';
+        }).join("");
+        if(par.length < 2) cells += '<td width="' + colWidthWord + '" style="width:' + colWidthWord + 'px;border:none;"></td>';
+        return '<tr>' + cells + '</tr>';
+      }).join("") + '</table>';
+    }else{
+      var pares = chunk(o.fotos, 2);
+      fotosBlock = '<table style="width:100%;border-collapse:collapse;">' + pares.map(function(par){
+        var cells = par.map(function(f){
+          return '<td style="width:50%;padding:8px;vertical-align:top;border:1px solid #D7DEE3;">' +
+            '<img src="' + f.dataUrl + '" style="width:100%;max-height:220px;object-fit:cover;display:block;margin-bottom:4px;">' +
+            '<div style="font-size:11px;color:#1c2b36;"><strong>' + (escapeHtml(f.legenda) || "Sem legenda") + '</strong></div>' +
+            '<div style="font-size:10px;color:#5B6B7A;">' + fotoMeta(f) + '</div>' +
+          '</td>';
+        }).join("");
+        if(par.length < 2) cells += '<td style="width:50%;border:none;"></td>';
+        return '<tr>' + cells + '</tr>';
+      }).join("") + '</table>';
+    }
+    var fotosSection = '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">3. Registro fotográfico</h2>' + fotosBlock;
+
+    var projetosRows = o.projetos.length
+      ? o.projetos.map(function(p){
+          return '<tr>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(p.nome) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(p.categoria) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(p.fileName) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + formatFileSize(p.fileSize) + '</td>' +
+          '</tr>';
+        }).join("")
+      : '<tr><td colspan="4" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhum projeto anexado.</td></tr>';
+
+    var projetosSection =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">4. Projetos da obra</h2>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;">' +
+        '<thead><tr style="background:#EEF1F4;">' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Nome</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Categoria</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Arquivo</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Tamanho</th>' +
+        '</tr></thead>' +
+        '<tbody>' + projetosRows + '</tbody>' +
+      '</table>' +
+      (o.projetos.length ? '<p style="font-size:11px;color:#5B6B7A;">Os arquivos PDF estão disponíveis no sistema (não embutidos neste relatório).</p>' : '');
+
+    var artsRows = o.arts.length
+      ? o.arts.map(function(a){
+          return '<tr>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(a.numero) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(a.tipo) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(a.responsavel) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(a.crea) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (formatDateBR(a.dataEmissao) || "&nbsp;") + '</td>' +
+          '</tr>';
+        }).join("")
+      : '<tr><td colspan="5" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhuma ART anexada.</td></tr>';
+
+    var artsSection =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">5. ARTs / RRTs</h2>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:8px;">' +
+        '<thead><tr style="background:#EEF1F4;">' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Número</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Tipo</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Responsável</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">CREA/CAU</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Emissão</th>' +
+        '</tr></thead>' +
+        '<tbody>' + artsRows + '</tbody>' +
+      '</table>' +
+      (o.arts.length ? '<p style="font-size:11px;color:#5B6B7A;">Os arquivos PDF das ARTs estão disponíveis no sistema (não embutidos neste relatório).</p>' : '');
+
+    var cronogramaRows = o.servicos.length
+      ? o.servicos.map(function(sv, i){
+          return '<tr>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + labelForServico(sv, i) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (formatDateBR(sv.dataInicioPrevista) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (formatDateBR(sv.dataFimPrevista) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (formatDateBR(sv.dataInicioReal) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (formatDateBR(sv.dataFimReal) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (Number(sv.percentual)||0) + '%</td>' +
+          '</tr>';
+        }).join("")
+      : '<tr><td colspan="6" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhum serviço cadastrado.</td></tr>';
+
+    var cronogramaSection =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">6. Cronograma</h2>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px;">' +
+        '<thead><tr style="background:#EEF1F4;">' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Serviço</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Início prev.</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Fim prev.</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Início real</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Fim real</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">%</th>' +
+        '</tr></thead>' +
+        '<tbody>' + cronogramaRows + '</tbody>' +
+      '</table>';
+
+    var materiaisRows = o.materiais.length
+      ? o.materiais.map(function(m){
+          return '<tr>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(m.descricao) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (escapeHtml(m.unidade) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (m.quantidadePrevista === "" ? "&nbsp;" : m.quantidadePrevista) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + (m.quantidadeAplicada === "" ? "&nbsp;" : m.quantidadeAplicada) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(m.especificacao) || "&nbsp;") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(m.status) + '</td>' +
+          '</tr>';
+        }).join("")
+      : '<tr><td colspan="6" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhum material especificado.</td></tr>';
+
+    var materiaisSection =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">7. Especificação e detalhamento de materiais</h2>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:11px;margin-bottom:16px;">' +
+        '<thead><tr style="background:#EEF1F4;">' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Material</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Un.</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Qtd. prev.</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Qtd. aplic.</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Especificação técnica</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;">Status</th>' +
+        '</tr></thead>' +
+        '<tbody>' + materiaisRows + '</tbody>' +
+      '</table>';
+
+    var obsGeraisSection =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">8. Observações gerais</h2>' +
+      '<p style="font-size:13px;white-space:pre-wrap;">' + (escapeHtml(o.observacoesGerais) || "Nenhuma observação registrada.") + '</p>';
+
+    var assinaturaTable =
+      '<table style="width:100%;margin-top:36px;">' +
+        '<tr>' +
+          '<td style="width:50%;font-size:12px;color:#5B6B7A;">Data: ' + (formatDateBR(o.dataRelatorio) || "&nbsp;") + '</td>' +
+          '<td style="width:50%;font-size:12px;color:#5B6B7A;border-top:1px solid #1c2b36;text-align:center;padding-top:4px;">Assinatura do responsável técnico</td>' +
+        '</tr>' +
+      '</table>';
+
+    return (
+      '<div style="font-family:Arial,Helvetica,sans-serif;color:#1c2b36;width:760px;padding:24px;background:#ffffff;">' +
+        headerTable + motivoLine + obsCabLine +
+        identificacaoTable + servicosTable + fotosSection + projetosSection + artsSection + cronogramaSection + materiaisSection + obsGeraisSection + assinaturaTable +
+      '</div>'
+    );
+  }
+
+  function buildResumoGeralHTML(){
+    var headerTable = buildHeaderTable(false);
+    var lista = appState.obras.slice().sort(function(a,b){
+      return (a.nome || "").localeCompare(b.nome || "");
+    });
+
+    var rows = lista.length ? lista.map(function(o){
+      var pct = progressoObra(o);
+      return '<tr>' +
+        '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(o.nome) || "&nbsp;") + '</td>' +
+        '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(o.responsavel) || "&nbsp;") + '</td>' +
+        '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(o.status) + '</td>' +
+        '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + pct + '%</td>' +
+        '<td style="border:1px solid #D7DEE3;padding:6px;">' + (formatDateBR(o.dataRelatorio) || "&nbsp;") + '</td>' +
+      '</tr>';
+    }).join("") : '<tr><td colspan="5" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhuma obra cadastrada.</td></tr>';
+
+    var table =
+      '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">Resumo geral das obras</h2>' +
+      '<table style="width:100%;border-collapse:collapse;font-size:12px;margin-bottom:16px;">' +
+        '<thead><tr style="background:#EEF1F4;">' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Obra</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Responsável</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Status</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">% médio</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Última atualização</th>' +
+        '</tr></thead>' +
+        '<tbody>' + rows + '</tbody>' +
+      '</table>' +
+      '<div style="font-size:11px;color:#5B6B7A;">Gerado em ' + formatDateBR(todayISO()) + ' · ' + lista.length + ' obra(s) cadastrada(s).</div>';
+
+    return (
+      '<div style="font-family:Arial,Helvetica,sans-serif;color:#1c2b36;width:760px;padding:24px;background:#ffffff;">' +
+        headerTable + table +
+      '</div>'
+    );
+  }
+
+  // ---------- DOWNLOAD ----------
+  function downloadBlob(blob, filename){
+    try{
+      var url = URL.createObjectURL(blob);
+      var a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.style.display = "none";
+      document.body.appendChild(a);
+      a.click();
+      setTimeout(function(){
+        if(a.parentNode) a.parentNode.removeChild(a);
+        URL.revokeObjectURL(url);
+      }, 1200);
+    }catch(err){
+      console.error(err);
+      toast("Não foi possível iniciar o download. Tente novamente ou use outro navegador.");
+    }
+  }
+
+  function renderToPDF(html, filename, buttonEl){
+    if(buttonEl) buttonEl.disabled = true;
+    toast("Gerando PDF...");
+    var container = document.getElementById("report-print-container");
+    container.innerHTML = html;
+
+    setTimeout(function(){
+      window.html2canvas(container, { scale:2, useCORS:true, backgroundColor:"#ffffff" }).then(function(canvas){
+        var jsPDFLib = window.jspdf && window.jspdf.jsPDF;
+        if(!jsPDFLib){ throw new Error("jsPDF não disponível"); }
+        var pdf = new jsPDFLib("p","mm","a4");
+        var pageWidth = 210, pageHeight = 297, margin = 10;
+        var usableWidth = pageWidth - margin*2;
+        var ratio = usableWidth / canvas.width;
+        var usableHeightPx = (pageHeight - margin*2) / ratio;
+
+        var renderedY = 0;
+        var firstPage = true;
+        while(renderedY < canvas.height){
+          var sliceHeight = Math.min(usableHeightPx, canvas.height - renderedY);
+          var pageCanvas = document.createElement("canvas");
+          pageCanvas.width = canvas.width;
+          pageCanvas.height = sliceHeight;
+          var ctx = pageCanvas.getContext("2d");
+          ctx.fillStyle = "#ffffff";
+          ctx.fillRect(0,0,pageCanvas.width,pageCanvas.height);
+          ctx.drawImage(canvas, 0, renderedY, canvas.width, sliceHeight, 0, 0, canvas.width, sliceHeight);
+          var imgData = pageCanvas.toDataURL("image/jpeg", 0.85);
+          if(!firstPage) pdf.addPage();
+          pdf.addImage(imgData, "JPEG", margin, margin, usableWidth, sliceHeight*ratio);
+          renderedY += sliceHeight;
+          firstPage = false;
+        }
+
+        var blob = pdf.output("blob");
+        downloadBlob(blob, filename);
+        toast("PDF gerado com sucesso.");
+      }).catch(function(err){
+        console.error(err);
+        toast("Erro ao gerar PDF. Tente novamente.");
+      }).finally(function(){
+        container.innerHTML = "";
+        if(buttonEl) buttonEl.disabled = false;
+      });
+    }, 50);
+  }
+
+  function exportarPDF(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var v = validarCampos(o);
+    if(!v.valid){
+      toast("Preencha os campos obrigatórios: " + v.missing.join(", "));
+      return;
+    }
+    var btn = document.getElementById("btn-exportar-pdf");
+    renderToPDF(buildReportHTML(o, "pdf"), buildFilename(o, "pdf"), btn);
+  }
+
+  function exportarResumoGeral(){
+    var btn = document.getElementById("btn-exportar-resumo");
+    renderToPDF(buildResumoGeralHTML(), "resumo-geral-obras-" + todayISO() + ".pdf", btn);
+  }
+
+  function exportarWord(){
+    var o = getObraById(currentObraId);
+    if(!o) return;
+    var v = validarCampos(o);
+    if(!v.valid){
+      toast("Preencha os campos obrigatórios: " + v.missing.join(", "));
+      return;
+    }
+    var btn = document.getElementById("btn-exportar-word");
+    btn.disabled = true;
+    toast("Gerando documento Word...");
+
+    var reportHtml = buildReportHTML(o, "word");
+    var fullHtml = '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Relatório de Obra</title></head><body>' + reportHtml + '</body></html>';
+
+    try{
+      if(window.htmlDocx && typeof window.htmlDocx.asBlob === "function"){
+        var blob = window.htmlDocx.asBlob(fullHtml);
+        downloadBlob(blob, buildFilename(o, "docx"));
+        toast("Documento Word gerado com sucesso.");
+      }else{
+        throw new Error("htmlDocx indisponível");
+      }
+    }catch(err){
+      console.warn("Usando exportação alternativa (.doc):", err);
+      var wordHtml = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Relatório de Obra</title></head><body>" + reportHtml + "</body></html>";
+      var docBlob = new Blob(["\ufeff", wordHtml], { type:"application/msword" });
+      downloadBlob(docBlob, buildFilename(o, "doc"));
+      toast("Documento gerado em formato alternativo (.doc), compatível com o Word.");
+    }finally{
+      btn.disabled = false;
+    }
+  }
+
+  // ---------- EVENTOS ----------
+  function attachEvents(){
+    document.getElementById("input-logo").addEventListener("change", function(e){
+      var file = e.target.files[0];
+      if(!file) return;
+      var oldPath = appState.config.logoPath;
+      compressImage(file, 400, 0.92).then(function(blob){
+        var path = "config/logo-" + Date.now() + ".jpg";
+        return sb.storage.from(window.SUPABASE_BUCKET).upload(path, blob, { contentType:"image/jpeg" }).then(function(res){
+          if(res.error) throw res.error;
+          appState.config.logoPath = path;
+          appState.config.logoBase64 = publicUrl(path);
+          showLogoPreview();
+          debouncedUpdate("config", 1, { logo_url: path });
+          if(oldPath) sb.storage.from(window.SUPABASE_BUCKET).remove([oldPath]);
+        });
+      }).catch(function(err){
+        console.error(err);
+        toast("Não foi possível carregar o logotipo.");
+      });
+      e.target.value = "";
+    });
+    document.getElementById("btn-remove-logo").addEventListener("click", function(){
+      var oldPath = appState.config.logoPath;
+      appState.config.logoPath = "";
+      appState.config.logoBase64 = "";
+      showLogoPreview();
+      debouncedUpdate("config", 1, { logo_url: "" });
+      if(oldPath) sb.storage.from(window.SUPABASE_BUCKET).remove([oldPath]);
+    });
+    document.getElementById("input-org-nome").addEventListener("input", function(e){
+      appState.config.orgName = e.target.value;
+      document.getElementById("topbar-org-name").textContent = e.target.value || "CTDO — Coordenadoria Técnica de Obras";
+      debouncedUpdate("config", 1, { org_name: e.target.value });
+    });
+    document.getElementById("input-org-subtitulo").addEventListener("input", function(e){
+      appState.config.orgSubtitle = e.target.value;
+      document.getElementById("topbar-org-subtitle").textContent = e.target.value;
+      debouncedUpdate("config", 1, { org_subtitle: e.target.value });
+    });
+
+    document.getElementById("btn-nova-obra").addEventListener("click", criarNovaObra);
+    document.getElementById("btn-exportar-resumo").addEventListener("click", exportarResumoGeral);
+
+    document.getElementById("input-busca-obra").addEventListener("input", function(e){
+      buscaAtual = e.target.value;
+      renderDashboard();
+    });
+
+    document.getElementById("filtro-status").addEventListener("click", function(e){
+      var btn = e.target.closest(".tab-btn");
+      if(!btn) return;
+      filtroStatusAtual = btn.dataset.status;
+      document.querySelectorAll("#filtro-status .tab-btn").forEach(function(b){
+        b.classList.toggle("active", b === btn);
+      });
+      renderDashboard();
+    });
+
+    document.getElementById("obras-lista").addEventListener("click", function(e){
+      var btn = e.target.closest('[data-action="abrir-obra"]');
+      if(btn){ abrirObra(btn.dataset.id); return; }
+      var card = e.target.closest(".obra-card");
+      if(card) abrirObra(card.dataset.obraId);
+    });
+
+    document.getElementById("btn-voltar-painel").addEventListener("click", voltarPainel);
+    document.getElementById("btn-excluir-obra").addEventListener("click", excluirObraAtual);
+
+    document.getElementById("input-obra-nome").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.nome = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { nome: e.target.value });
+    });
+    document.getElementById("input-obra-endereco").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.endereco = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { endereco: e.target.value });
+    });
+    document.getElementById("input-obra-responsavel").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.responsavel = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { responsavel: e.target.value });
+    });
+    document.getElementById("input-obra-art").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.contratoArt = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { contrato_art: e.target.value });
+    });
+    document.getElementById("input-obra-drive").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.driveFolder = e.target.value.trim(); tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { drive_folder: o.driveFolder || null });
+      renderDrive();
+    });
+    document.getElementById("drive-recarregar").addEventListener("click", function(){
+      var f = document.getElementById("drive-frame"); var src = f.src; f.src = "about:blank"; setTimeout(function(){ f.src = src; }, 50);
+    });
+    document.getElementById("input-obra-status").addEventListener("change", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.status = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { status: e.target.value });
+    });
+    document.getElementById("input-obra-data").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.dataRelatorio = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { data_relatorio: e.target.value || null });
+    });
+
+    document.getElementById("input-cab-motivo").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.cabecalho.motivo = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { motivo: e.target.value });
+    });
+    document.getElementById("input-cab-observacao").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.cabecalho.observacao = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { observacao: e.target.value });
+    });
+    document.getElementById("input-observacoes-gerais").addEventListener("input", function(e){
+      var o = getObraById(currentObraId); if(!o) return;
+      o.observacoesGerais = e.target.value; tocarUpdatedAt(o); debouncedUpdate("obras", o.id, { observacoes_gerais: e.target.value });
+    });
+
+    document.getElementById("btn-add-servico").addEventListener("click", addServico);
+
+    document.getElementById("servicos-lista").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field){
+        updateServicoField(t.dataset.id, t.dataset.field, t.value);
+        if(t.dataset.field === "descricao"){
+          refreshFotoServicoLabels();
+          renderCronograma();
+        }
+        if(t.dataset.field === "percentual") renderCronograma();
+      }
+    });
+    document.getElementById("servicos-lista").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field === "status"){
+        updateServicoField(t.dataset.id, "status", t.value);
+        refreshStatusChip(t.dataset.id, t.value);
+        renderCronograma();
+      }
+    });
+    document.getElementById("servicos-lista").addEventListener("click", function(e){
+      var btn = e.target.closest('[data-action="remove-servico"]');
+      if(btn) removeServico(btn.dataset.id);
+    });
+
+    document.getElementById("btn-add-fotos").addEventListener("click", function(){
+      document.getElementById("input-fotos").click();
+    });
+    document.getElementById("input-fotos").addEventListener("change", function(e){
+      handleFotosInput(e.target.files);
+      e.target.value = "";
+    });
+    document.getElementById("fotos-grid").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field){
+        updateFotoField(t.dataset.id, t.dataset.field, t.value);
+        if(t.dataset.field === "legenda"){
+          var card = t.closest(".foto-card");
+          if(card){
+            var img = card.querySelector(".foto-thumb");
+            if(img) img.alt = t.value || "Foto da obra";
+          }
+        }
+      }
+    });
+    document.getElementById("fotos-grid").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field === "servicoId"){
+        updateFotoField(t.dataset.id, "servicoId", t.value);
+      }
+    });
+    document.getElementById("fotos-grid").addEventListener("click", function(e){
+      var btn = e.target.closest('[data-action="remove-foto"]');
+      if(btn) removeFoto(btn.dataset.id);
+    });
+
+    document.getElementById("btn-add-projetos").addEventListener("click", function(){
+      document.getElementById("input-projetos").click();
+    });
+    document.getElementById("input-projetos").addEventListener("change", function(e){
+      handleProjetosInput(e.target.files);
+      e.target.value = "";
+    });
+    document.getElementById("projetos-lista").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field === "nome") updateProjetoField(t.dataset.id, "nome", t.value);
+    });
+    document.getElementById("projetos-lista").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field === "categoria") updateProjetoField(t.dataset.id, "categoria", t.value);
+    });
+    document.getElementById("projetos-lista").addEventListener("click", function(e){
+      var o = getObraById(currentObraId);
+      var abrirBtn = e.target.closest('[data-action="abrir-projeto"]');
+      if(abrirBtn){ abrirArquivo(o && o.projetos.find(function(p){ return p.id === abrirBtn.dataset.id; })); return; }
+      var removerBtn = e.target.closest('[data-action="remove-projeto"]');
+      if(removerBtn) removeProjeto(removerBtn.dataset.id);
+    });
+
+    document.getElementById("btn-add-arts").addEventListener("click", function(){
+      document.getElementById("input-arts").click();
+    });
+    document.getElementById("input-arts").addEventListener("change", function(e){
+      handleArtsInput(e.target.files);
+      e.target.value = "";
+    });
+    document.getElementById("arts-lista").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field && t.tagName !== "SELECT"){
+        updateArtField(t.dataset.id, t.dataset.field, t.value);
+      }
+    });
+    document.getElementById("arts-lista").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field === "tipo") updateArtField(t.dataset.id, "tipo", t.value);
+    });
+    document.getElementById("arts-lista").addEventListener("click", function(e){
+      var o = getObraById(currentObraId);
+      var abrirBtn = e.target.closest('[data-action="abrir-art"]');
+      if(abrirBtn){ abrirArquivo(o && o.arts.find(function(a){ return a.id === abrirBtn.dataset.id; })); return; }
+      var removerBtn = e.target.closest('[data-action="remove-art"]');
+      if(removerBtn) removeArt(removerBtn.dataset.id);
+    });
+
+    document.getElementById("cronograma-lista").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field){
+        updateServicoField(t.dataset.id, t.dataset.field, t.value);
+        renderCronograma();
+      }
+    });
+
+    document.getElementById("btn-add-material").addEventListener("click", addMaterial);
+    document.getElementById("materiais-lista").addEventListener("input", function(e){
+      var t = e.target;
+      if(t.dataset && t.dataset.field && t.tagName !== "SELECT"){
+        updateMaterialField(t.dataset.id, t.dataset.field, t.value);
+      }
+    });
+    document.getElementById("materiais-lista").addEventListener("change", function(e){
+      var t = e.target;
+      if(t.dataset && (t.dataset.field === "status" || t.dataset.field === "servicoId")){
+        updateMaterialField(t.dataset.id, t.dataset.field, t.value);
+      }
+    });
+    document.getElementById("materiais-lista").addEventListener("click", function(e){
+      var btn = e.target.closest('[data-action="remove-material"]');
+      if(btn) removeMaterial(btn.dataset.id);
+    });
+
+    document.getElementById("btn-exportar-pdf").addEventListener("click", exportarPDF);
+    document.getElementById("btn-exportar-word").addEventListener("click", exportarWord);
+  }
+
+  // ---------- INICIALIZAÇÃO ----------
+  document.addEventListener("DOMContentLoaded", function(){
+    var loadingEl = document.getElementById("loading-state");
+    try{
+      initSupabaseClient();
+    }catch(err){
+      console.error(err);
+      loadingEl.textContent = "Erro de configuração do Supabase: " + err.message;
+      return;
+    }
+    attachEvents();
+    carregar();
+    function carregar(){
+      loadingEl.style.display = "";
+      loadingEl.textContent = "Carregando dados…";
+      var limite = new Promise(function(_, rej){ setTimeout(function(){ rej(new Error("tempo_esgotado")); }, 20000); });
+      Promise.race([loadStateFromSupabase(), limite]).then(function(){
+        loadingEl.style.display = "none";
+        populateConfigForm();
+        renderDashboard();
+        showView("dashboard");
+      }).catch(function(err){
+        console.error(err);
+        mostrarErroCarga(err);
+      });
+    }
+    function mostrarErroCarga(err){
+      var msg = (err && (err.message || err.details || err.hint)) || String(err);
+      var semRede = typeof navigator !== "undefined" && navigator.onLine === false;
+      var titulo, texto;
+      if(semRede){
+        titulo = "Sem conexão com a internet";
+        texto = "Este computador está sem internet. Conecte-se e tente de novo.";
+      } else if(/Failed to fetch|NetworkError|Load failed|tempo_esgotado|ERR_|503|540|paused/i.test(msg)){
+        titulo = "Servidor de dados indisponível";
+        texto = "O banco de dados (Supabase) não respondeu. O motivo mais comum é o projeto gratuito ter sido pausado por falta de uso: entre em supabase.com, abra o projeto \"ctdo-relatorio-obras\" e clique em \"Restore project\". Leva de 2 a 5 minutos para voltar. Seus dados não são perdidos.";
+      } else if(/JWT|apikey|Invalid API key|401|403/i.test(msg)){
+        titulo = "Chave de acesso recusada";
+        texto = "O Supabase recusou a chave do arquivo supabase-config.js. Confira se a URL e a anon key estão corretas.";
+      } else if(/relation|column|does not exist|schema cache/i.test(msg)){
+        titulo = "Estrutura do banco diferente do esperado";
+        texto = "Uma tabela ou coluna que o site usa não existe no banco. Verifique as tabelas no Supabase.";
+      } else {
+        titulo = "Não foi possível carregar os dados";
+        texto = "Ocorreu um erro ao buscar as obras no Supabase.";
+      }
+      loadingEl.innerHTML = '<div class="erro-carga" role="alert"><h2></h2><p class="t"></p><p><code></code></p><button type="button" class="btn btn-secondary" id="btn-tentar-novamente">Tentar novamente</button></div>';
+      loadingEl.querySelector("h2").textContent = titulo;
+      loadingEl.querySelector(".t").textContent = texto;
+      loadingEl.querySelector("code").textContent = "Detalhe técnico: " + (msg === "tempo_esgotado" ? "sem resposta em 20 s" : msg);
+      document.getElementById("btn-tentar-novamente").addEventListener("click", carregar);
+    }
+  });
+
+})();
+</script>
+
+</body>
+</html>
