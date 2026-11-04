@@ -538,6 +538,9 @@
       </label>
     </section>
 
+    <!-- VÍNCULOS: ORÇAMENTO (ObraCerta) E CONTRATO (Controle de Empenhos) -->
+    <section id="card-vinculos"></section>
+
     <!-- CABEÇALHO DA VISITA -->
     <section class="card" id="card-cabecalho">
       <p class="card-eyebrow"><span class="divider"></span>Dados desta visita/medição<span class="divider"></span></p>
@@ -668,6 +671,171 @@
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="supabase-config.js"></script>
+<script>
+/* =====================================================================
+   INTEGRAÇÃO DOS SISTEMAS CTOSM  (mesmo bloco nos 3 sistemas)
+   Orçamentos (ObraCerta) · Projetos/Relatório de Obras · Controle de Empenhos
+   Vínculo: tabela obra_vinculos (projeto Supabase de orçamentos/empenhos)
+   obra_id (Relatório de Obras) → contrato_id (Empenhos) + orcamento_ids (ObraCerta)
+   ===================================================================== */
+(function(){
+  const CQ_URL = 'https://cqopgqmsjwfczhbiishj.supabase.co', CQ_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImNxb3BncW1zandmY3poYmlpc2hqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg2NDM5MzAsImV4cCI6MjEwNDIxOTkzMH0.O3HuqHax9u2ZEdW4gpodbfPxWU05Sujg94L2SicfmbI';
+  const RL_URL = 'https://vvcyfdgadvacfiqlltly.supabase.co', RL_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ2Y3lmZGdhZHZhY2ZpcWxsdGx5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODg3MjMyNTYsImV4cCI6MjEwNDI5OTI1Nn0.3jX0wWv0uHqOKEPcogQmqxDOD3NvOrpK-h8FRtL4llE';
+  const LINKS = {
+    orc: 'https://engbrunoandrademartins-alt.github.io/Orsamento-de-obras/',
+    rel: 'https://engbrunoandrademartins-alt.github.io/ctdo-relatorio-obras/',
+    emp: 'https://engbrunoandrademartins-alt.github.io/controle-empenhos-cuiaba/'
+  };
+  let cq = null, rl = null;
+  function cli(){
+    if (!window.supabase || !window.supabase.createClient) throw new Error('Supabase indisponível');
+    if (!cq) cq = window.supabase.createClient(CQ_URL, CQ_KEY, { auth:{ persistSession:false, storageKey:'ctosm-cq' } });
+    if (!rl) rl = window.supabase.createClient(RL_URL, RL_KEY, { auth:{ persistSession:false, storageKey:'ctosm-rl' } });
+  }
+  const e = s => (s === undefined || s === null) ? '' : String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+  const money = v => (Number(v) || 0).toLocaleString('pt-BR', { style:'currency', currency:'BRL' });
+  const pct = (a, b) => b > 0 ? ((a / b) * 100).toLocaleString('pt-BR', { maximumFractionDigits:1 }) + '%' : '—';
+  const chk = r => { if (r.error) throw r.error; return r.data || []; };
+
+  // ---------- estilo (prefixo ctosm-) ----------
+  const css = `
+  .ctosm-bar{display:flex;align-items:center;gap:6px;flex-wrap:wrap;background:#0f2e1f;color:#cfe7d8;font:12.5px/1.2 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;padding:6px 14px;position:relative;z-index:50}
+  .ctosm-bar b{color:#fff;font-weight:600;margin-right:6px;letter-spacing:.2px}
+  .ctosm-bar a{color:#cfe7d8;text-decoration:none;padding:4px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.18)}
+  .ctosm-bar a:hover{background:rgba(255,255,255,.08);color:#fff}
+  .ctosm-bar a.on{background:#2f8f5b;border-color:#2f8f5b;color:#fff}
+  .ctosm-card{border:1px solid #d7e3dc;border-radius:10px;padding:14px 16px;background:#fff;margin:14px 0;font:14px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:#1d2b24}
+  .ctosm-card h3{margin:0 0 4px;font-size:15px}
+  .ctosm-card .mut{color:#5d6f66;font-size:12.5px}
+  .ctosm-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:10px;margin:10px 0}
+  .ctosm-kpi{border:1px solid #e3ece7;border-radius:8px;padding:8px 10px;background:#f7faf8}
+  .ctosm-kpi span{display:block;font-size:11.5px;color:#5d6f66}
+  .ctosm-kpi b{font-size:15px;font-variant-numeric:tabular-nums}
+  .ctosm-row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin:6px 0}
+  .ctosm-row select{flex:1;min-width:220px;padding:7px 9px;border:1px solid #c9d8cf;border-radius:7px;font:inherit;background:#fff}
+  .ctosm-btn{padding:7px 12px;border-radius:7px;border:1px solid #2f8f5b;background:#2f8f5b;color:#fff;font:inherit;cursor:pointer}
+  .ctosm-btn.sec{background:#fff;color:#2f8f5b}
+  .ctosm-list{margin:6px 0 0;padding:0;list-style:none}
+  .ctosm-list li{display:flex;gap:8px;align-items:center;justify-content:space-between;border-top:1px solid #eef3f0;padding:6px 0}
+  .ctosm-list a,.ctosm-card a{color:#1f7a4a}
+  .ctosm-tag{font-size:11px;background:#e7f3ec;color:#1f7a4a;border-radius:999px;padding:2px 8px;white-space:nowrap}
+  .ctosm-chk{display:flex;gap:6px;align-items:center;padding:3px 0}
+  @media print{.ctosm-bar,.ctosm-card{display:none!important}}`;
+  function injectCss(){ if (document.getElementById('ctosm-css')) return; const s = document.createElement('style'); s.id = 'ctosm-css'; s.textContent = css; document.head.appendChild(s); }
+
+  // ---------- barra de navegação entre os sistemas ----------
+  function bar(atual){
+    injectCss(); if (document.querySelector('.ctosm-bar')) return;
+    const d = document.createElement('div'); d.className = 'ctosm-bar';
+    d.innerHTML = `<b>Sistemas CTOSM</b>
+      <a href="${LINKS.orc}" class="${atual === 'orc' ? 'on' : ''}">Orçamentos</a>
+      <a href="${LINKS.rel}" class="${atual === 'rel' ? 'on' : ''}">Projetos e relatório de obras</a>
+      <a href="${LINKS.emp}" class="${atual === 'emp' ? 'on' : ''}">Empenhos</a>`;
+    document.body.prepend(d);
+  }
+
+  // ---------- dados ----------
+  async function obras(){ cli(); return chk(await rl.from('obras').select('id,nome,status,endereco').order('nome')); }
+  async function contratos(){ cli(); return chk(await cq.from('vw_emp_contrato_resumo').select('*').order('numero_contrato')); }
+  async function orcs(){ cli(); return chk(await cq.from('vw_orc_resumo').select('*').eq('referencia', false).order('nome')); }
+  async function vincs(){ cli(); return chk(await cq.from('obra_vinculos').select('*')); }
+  async function salvar(v){ cli(); v.atualizado_em = new Date().toISOString(); chk(await cq.from('obra_vinculos').upsert(v)); }
+  // um orçamento pertence a uma obra só: retira dos outros vínculos
+  async function soltarOrc(orcId, exceto){ const all = await vincs();
+    for (const v of all) if (v.obra_id !== exceto && (v.orcamento_ids || []).includes(orcId)){ v.orcamento_ids = v.orcamento_ids.filter(x => x !== orcId); await salvar(v); } }
+
+  function kpisContrato(c){
+    if (!c) return '<div class="mut">Nenhum contrato vinculado.</div>';
+    const saldo = (+c.valor_total || 0) - (+c.empenhado || 0);
+    return `<div class="ctosm-grid">
+      <div class="ctosm-kpi"><span>Contrato ${e(c.numero_contrato)} — ${e(c.credor)}</span><b>${money(c.valor_total)}</b></div>
+      <div class="ctosm-kpi"><span>Empenhado (${pct(c.empenhado, c.valor_total)})</span><b>${money(c.empenhado)}</b></div>
+      <div class="ctosm-kpi"><span>Notas lançadas / pago</span><b>${money(c.utilizado)} / ${money(c.pago)}</b></div>
+      <div class="ctosm-kpi"><span>Saldo do contrato</span><b style="color:${saldo < 0 ? '#b42318' : 'inherit'}">${money(saldo)}</b></div></div>`;
+  }
+  function kpisOrcs(lista){
+    if (!lista.length) return '<div class="mut">Nenhum orçamento vinculado.</div>';
+    const tot = lista.reduce((s, o) => s + (+o.valor_final || 0), 0), med = lista.reduce((s, o) => s + (+o.medido_final || 0), 0);
+    return `<div class="ctosm-grid"><div class="ctosm-kpi"><span>Valor orçado (${lista.length} orçamento${lista.length > 1 ? 's' : ''})</span><b>${money(tot)}</b></div>
+      <div class="ctosm-kpi"><span>Medido acumulado (${pct(med, tot)})</span><b>${money(med)}</b></div>
+      <div class="ctosm-kpi"><span>Saldo a medir</span><b>${money(tot - med)}</b></div></div>
+      <ul class="ctosm-list">${lista.map(o => `<li><span>${e(o.nome)} <span class="ctosm-tag">${o.n_medicoes || 0} medição(ões)</span></span><a href="${LINKS.orc}?orc=${o.id}" target="_blank" rel="noopener">abrir orçamento ↗</a></li>`).join('')}</ul>`;
+  }
+  const erro = (el, err) => { el.innerHTML = `<div class="ctosm-card"><h3>Vínculos entre sistemas</h3><div class="mut">Não foi possível carregar os vínculos: ${e(err.message || err)}</div></div>`; };
+
+  // ---------- painel na OBRA (Relatório de Obras): escolhe contrato e orçamentos ----------
+  async function painelObra(el, obraId, obraNome){
+    injectCss(); if (!el || !obraId) return; el.innerHTML = '<div class="ctosm-card"><div class="mut">Carregando vínculos…</div></div>';
+    try {
+      const [cs, os, vs] = await Promise.all([contratos(), orcs(), vincs()]);
+      const v = vs.find(x => x.obra_id === obraId) || { obra_id:obraId, obra_nome:obraNome, contrato_id:null, orcamento_ids:[] };
+      const outros = new Map(); vs.forEach(x => { if (x.obra_id !== obraId) (x.orcamento_ids || []).forEach(id => outros.set(id, x.obra_nome)); });
+      const c = cs.find(x => x.id === v.contrato_id); const meus = os.filter(o => (v.orcamento_ids || []).includes(o.id));
+      el.innerHTML = `<div class="ctosm-card"><h3>Orçamento e contrato desta obra</h3>
+        <div class="mut">Liga esta obra ao orçamento (ObraCerta) e ao contrato/empenhos (Controle de Empenhos).</div>
+        <div class="ctosm-row"><select id="ctosm-ctr"><option value="">— contrato (Controle de Empenhos) —</option>${cs.map(x => `<option value="${x.id}" ${x.id === v.contrato_id ? 'selected' : ''}>${e(x.numero_contrato)} — ${e(x.credor)}</option>`).join('')}</select>
+          ${c ? `<a class="ctosm-btn sec" href="${LINKS.emp}?contrato=${c.id}" target="_blank" rel="noopener">abrir empenhos ↗</a>` : ''}</div>
+        ${kpisContrato(c)}
+        <details ${meus.length ? '' : 'open'}><summary style="cursor:pointer;margin:6px 0">Orçamentos vinculados (${meus.length}) — marcar/desmarcar</summary>
+          <div style="max-height:220px;overflow:auto;border:1px solid #e3ece7;border-radius:8px;padding:6px 10px;margin:6px 0">${os.map(o => `<label class="ctosm-chk"><input type="checkbox" data-orc="${o.id}" ${(v.orcamento_ids || []).includes(o.id) ? 'checked' : ''}> ${e(o.nome)} <span class="mut">${money(o.valor_final)}${outros.has(o.id) ? ' · hoje em: ' + e(outros.get(o.id)) : ''}</span></label>`).join('') || '<div class="mut">Nenhum orçamento no ObraCerta.</div>'}</div></details>
+        ${kpisOrcs(meus)}
+        <div class="ctosm-row"><button class="ctosm-btn" id="ctosm-salvar">Salvar vínculos</button><span class="mut" id="ctosm-msg"></span></div></div>`;
+      el.querySelector('#ctosm-salvar').onclick = async () => {
+        const ids = [...el.querySelectorAll('[data-orc]')].filter(i => i.checked).map(i => i.dataset.orc);
+        try { for (const id of ids) await soltarOrc(id, obraId);
+          await salvar({ obra_id:obraId, obra_nome:obraNome, contrato_id:el.querySelector('#ctosm-ctr').value || null, orcamento_ids:ids });
+          painelObra(el, obraId, obraNome); } catch(err){ el.querySelector('#ctosm-msg').textContent = 'Erro: ' + (err.message || err); } };
+    } catch(err){ erro(el, err); }
+  }
+
+  // ---------- painel no ORÇAMENTO (ObraCerta): escolhe a obra e o contrato ----------
+  async function painelOrc(el, orcId){
+    injectCss(); if (!el || !orcId) return; el.innerHTML = '<div class="ctosm-card"><div class="mut">Carregando vínculos…</div></div>';
+    try {
+      const [obs, cs, vs] = await Promise.all([obras(), contratos(), vincs()]);
+      const v = vs.find(x => (x.orcamento_ids || []).includes(orcId));
+      const c = v && cs.find(x => x.id === v.contrato_id);
+      el.innerHTML = `<div class="ctosm-card" style="margin:0 0 14px"><h3>Obra e contrato</h3>
+        <div class="mut">Liga este orçamento à obra (Projetos e relatório de obras) e ao contrato (Controle de Empenhos).</div>
+        <div class="ctosm-row"><select id="ctosm-obra"><option value="">— obra (Relatório de Obras) —</option>${obs.map(o => `<option value="${o.id}" ${v && v.obra_id === o.id ? 'selected' : ''}>${e(o.nome)}${o.status ? ' · ' + e(o.status) : ''}</option>`).join('')}</select>
+          ${v ? `<a class="ctosm-btn sec" href="${LINKS.rel}?obra=${v.obra_id}" target="_blank" rel="noopener">abrir obra ↗</a>` : ''}</div>
+        <div class="ctosm-row"><select id="ctosm-ctr"><option value="">— contrato (Controle de Empenhos) —</option>${cs.map(x => `<option value="${x.id}" ${c && c.id === x.id ? 'selected' : ''}>${e(x.numero_contrato)} — ${e(x.credor)}</option>`).join('')}</select>
+          ${c ? `<a class="ctosm-btn sec" href="${LINKS.emp}?contrato=${c.id}" target="_blank" rel="noopener">abrir empenhos ↗</a>` : ''}</div>
+        ${c ? kpisContrato(c) : ''}
+        <div class="ctosm-row"><button class="ctosm-btn" id="ctosm-salvar">Salvar vínculos</button><span class="mut" id="ctosm-msg">O contrato fica gravado na obra: vale para todos os orçamentos dela.</span></div></div>`;
+      el.querySelector('#ctosm-salvar').onclick = async () => {
+        const oid = el.querySelector('#ctosm-obra').value, cid = el.querySelector('#ctosm-ctr').value || null;
+        try {
+          if (!oid){ if (v){ v.orcamento_ids = v.orcamento_ids.filter(x => x !== orcId); await salvar(v); } painelOrc(el, orcId); return; }
+          await soltarOrc(orcId, oid);
+          const atual = (await vincs()).find(x => x.obra_id === oid);
+          const ob = obs.find(o => o.id === oid);
+          await salvar({ obra_id:oid, obra_nome:ob ? ob.nome : '', contrato_id:cid, orcamento_ids:[...new Set([...(atual ? atual.orcamento_ids : []), orcId])] });
+          painelOrc(el, orcId);
+        } catch(err){ el.querySelector('#ctosm-msg').textContent = 'Erro: ' + (err.message || err); } };
+    } catch(err){ erro(el, err); }
+  }
+
+  // ---------- painel no CONTRATO (Empenhos): obras e orçamentos ligados ----------
+  async function painelContrato(el, contratoId){
+    injectCss(); if (!el || !contratoId) return; el.innerHTML = '<div class="ctosm-card"><div class="mut">Carregando obras vinculadas…</div></div>';
+    try {
+      const [vs, os] = await Promise.all([vincs(), orcs()]);
+      const meus = vs.filter(v => v.contrato_id === contratoId);
+      const om = new Map(os.map(o => [o.id, o]));
+      const tot = meus.reduce((s, v) => s + (v.orcamento_ids || []).reduce((t, id) => t + (+(om.get(id) || {}).valor_final || 0), 0), 0);
+      el.innerHTML = `<div class="ctosm-card"><h3>Obras atendidas por este contrato</h3>
+        <div class="mut">Vínculos feitos no Relatório de Obras ou no ObraCerta.${meus.length ? ' Valor orçado das obras: <b>' + money(tot) + '</b>' : ''}</div>
+        ${meus.length ? `<ul class="ctosm-list">${meus.map(v => `<li><span><b>${e(v.obra_nome)}</b>${(v.orcamento_ids || []).map(id => om.get(id)).filter(Boolean).map(o => `<br><span class="mut">${e(o.nome)} · ${money(o.valor_final)} · medido ${money(o.medido_final)}</span> <a href="${LINKS.orc}?orc=${o.id}" target="_blank" rel="noopener">orçamento ↗</a>`).join('')}</span>
+          <a href="${LINKS.rel}?obra=${v.obra_id}" target="_blank" rel="noopener">obra ↗</a></li>`).join('')}</ul>` : '<div class="mut" style="margin-top:6px">Nenhuma obra vinculada ainda.</div>'}</div>`;
+    } catch(err){ erro(el, err); }
+  }
+
+  const param = k => new URLSearchParams(location.search).get(k);
+  window.CTOSM = { LINKS, bar, painelObra, painelOrc, painelContrato, param };
+})();
+
+</script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <script src="https://unpkg.com/html-docx-js@0.3.1/dist/html-docx.js"></script>
@@ -963,6 +1131,7 @@
     currentObraId = id;
     populateObraForm();
     showView("obra");
+    if(window.CTOSM){ var ob = getObraById(id); CTOSM.painelObra(document.getElementById("card-vinculos"), id, ob ? ob.nome : ""); }
   }
 
   function voltarPainel(){
@@ -2552,6 +2721,7 @@
       loadingEl.textContent = "Erro de configuração do Supabase: " + err.message;
       return;
     }
+    if(window.CTOSM) CTOSM.bar("rel");
     attachEvents();
     carregar();
     function carregar(){
@@ -2563,6 +2733,8 @@
         populateConfigForm();
         renderDashboard();
         showView("dashboard");
+        var obraParam = window.CTOSM && CTOSM.param("obra");
+        if(obraParam && getObraById(obraParam)) abrirObra(obraParam);
       }).catch(function(err){
         console.error(err);
         mostrarErroCarga(err);
