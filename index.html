@@ -287,6 +287,11 @@
     display:flex;align-items:center;justify-content:center;
     font-size:11px;font-weight:800;letter-spacing:0.02em;
   }
+  .projeto-icon.cad-icon{background:#E8EEF8;color:#2B4C7E;}
+  .projeto-icon.duo-icon{background:linear-gradient(135deg,var(--color-primary-bg,#E6EEF5) 50%,#E8EEF8 50%);font-size:10px;line-height:1.1;text-align:center;}
+  .projeto-cad{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-top:6px;font-size:12px;}
+  .projeto-cad .tag{font-size:10.5px;font-weight:600;background:#E8EEF8;color:#2B4C7E;border-radius:999px;padding:2px 8px;}
+  .projeto-cad a{color:#2B4C7E;}
   .projeto-icon.art-icon{background:var(--color-warning-bg);color:var(--color-warning);}
   .projeto-info{flex:1 1 180px;min-width:180px;}
   .projeto-info label{margin-bottom:8px;}
@@ -582,11 +587,17 @@
       <p class="card-eyebrow"><span class="num">04</span>Projetos da obra<span class="divider"></span></p>
 
       <input type="file" id="input-projetos" accept="application/pdf,.pdf" multiple style="display:none;">
-      <button type="button" id="btn-add-projetos" class="btn btn-secondary">+ Adicionar projeto (PDF)</button>
+      <input type="file" id="input-cad" accept=".dwg,.dxf,.zip,.rar,.7z" multiple style="display:none;">
+      <input type="file" id="input-cad-anexo" accept=".dwg,.dxf,.zip,.rar,.7z" style="display:none;">
+      <input type="file" id="input-pdf-anexo" accept="application/pdf,.pdf" style="display:none;">
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button type="button" id="btn-add-projetos" class="btn btn-secondary">+ Adicionar projeto (PDF)</button>
+        <button type="button" id="btn-add-cad" class="btn btn-secondary">+ Adicionar arquivo CAD (DWG/DXF)</button>
+      </div>
 
       <div class="projetos-lista" id="projetos-lista"></div>
       <p class="empty-hint" id="projetos-empty-hint">Nenhum projeto anexado ainda.</p>
-      <p class="export-hint">Aceita arquivos PDF (plantas, memoriais, etc.). Os arquivos ficam salvos no servidor (Supabase); o relatório exportado lista os projetos anexados, mas não embute o conteúdo dos PDFs.</p>
+      <p class="export-hint">Cada projeto guarda o PDF (plot das pranchas) e o arquivo CAD (DWG, DXF ou ZIP). Ao enviar um DWG com o mesmo nome de um PDF já anexado (ou o contrário), os dois ficam juntos no mesmo projeto. Em "Orçamento" escolha a planilha do ObraCerta a que o projeto se refere (lista os orçamentos vinculados a esta obra no painel de vínculos). Os arquivos ficam salvos no servidor (Supabase); o relatório exportado lista os projetos, mas não embute o conteúdo.</p>
     </section>
 
     <!-- GOOGLE DRIVE -->
@@ -739,6 +750,15 @@
   async function contratos(){ cli(); return chk(await cq.from('vw_emp_contrato_resumo').select('*').order('numero_contrato')); }
   async function orcs(){ cli(); return chk(await cq.from('vw_orc_resumo').select('*').eq('referencia', false).order('nome')); }
   async function vincs(){ cli(); return chk(await cq.from('obra_vinculos').select('*')); }
+  async function projetosObra(obraId){ cli(); return chk(await rl.from('projetos').select('id,nome,categoria,storage_path,file_name,file_size,cad_path,cad_name,cad_size,orcamento_id,data_upload').eq('obra_id', obraId).order('nome')); }
+  async function orcsDaObra(obraId){ const [vs, os] = await Promise.all([vincs(), orcs()]); const v = vs.find(x => x.obra_id === obraId); const ids = v ? (v.orcamento_ids || []) : []; return os.filter(o => ids.includes(o.id)); }
+  const arqUrl = p => p ? 'https://vvcyfdgadvacfiqlltly.supabase.co/storage/v1/object/public/arquivos-obras/' + p.split('/').map(encodeURIComponent).join('/') : '';
+  function listaProjetos(ps, orcId){
+    if (!ps.length) return '<div class="mut">Nenhum projeto anexado a esta obra.</div>';
+    const ord = ps.slice().sort((a, b) => ((b.orcamento_id === orcId) - (a.orcamento_id === orcId)));
+    return `<ul class="ctosm-list">${ord.map(p => `<li><span>${e(p.nome || p.file_name || p.cad_name)} <span class="ctosm-tag">${e(p.categoria || 'Projeto')}</span>${orcId && p.orcamento_id === orcId ? ' <span class="ctosm-tag" style="background:#fff4d6;color:#8a5a00">deste orçamento</span>' : ''}</span>
+      <span style="white-space:nowrap">${p.storage_path ? `<a href="${arqUrl(p.storage_path)}" target="_blank" rel="noopener">PDF ↗</a>` : ''}${p.storage_path && p.cad_path ? ' · ' : ''}${p.cad_path ? `<a href="${arqUrl(p.cad_path)}" target="_blank" rel="noopener">DWG ↓</a>` : ''}</span></li>`).join('')}</ul>`;
+  }
   async function salvar(v){ cli(); v.atualizado_em = new Date().toISOString(); chk(await cq.from('obra_vinculos').upsert(v)); }
   // um orçamento pertence a uma obra só: retira dos outros vínculos
   async function soltarOrc(orcId, exceto){ const all = await vincs();
@@ -802,7 +822,9 @@
         <div class="ctosm-row"><select id="ctosm-ctr"><option value="">— contrato (Controle de Empenhos) —</option>${cs.map(x => `<option value="${x.id}" ${c && c.id === x.id ? 'selected' : ''}>${e(x.numero_contrato)} — ${e(x.credor)}</option>`).join('')}</select>
           ${c ? `<a class="ctosm-btn sec" href="${LINKS.emp}?contrato=${c.id}" target="_blank" rel="noopener">abrir empenhos ↗</a>` : ''}</div>
         ${c ? kpisContrato(c) : ''}
+        ${v ? `<details open><summary style="cursor:pointer;margin:6px 0">Projetos da obra (PDF e DWG)</summary><div id="ctosm-projs" class="mut">Carregando projetos…</div></details>` : ''}
         <div class="ctosm-row"><button class="ctosm-btn" id="ctosm-salvar">Salvar vínculos</button><span class="mut" id="ctosm-msg">O contrato fica gravado na obra: vale para todos os orçamentos dela.</span></div></div>`;
+      if (v) projetosObra(v.obra_id).then(ps => { const d = el.querySelector('#ctosm-projs'); if (d) d.outerHTML = listaProjetos(ps, orcId); }).catch(err => { const d = el.querySelector('#ctosm-projs'); if (d) d.textContent = 'Não foi possível carregar os projetos: ' + (err.message || err); });
       el.querySelector('#ctosm-salvar').onclick = async () => {
         const oid = el.querySelector('#ctosm-obra').value, cid = el.querySelector('#ctosm-ctr').value || null;
         try {
@@ -832,7 +854,7 @@
   }
 
   const param = k => new URLSearchParams(location.search).get(k);
-  window.CTOSM = { LINKS, bar, painelObra, painelOrc, painelContrato, param };
+  window.CTOSM = { LINKS, bar, painelObra, painelOrc, painelContrato, param, orcsDaObra, projetosObra };
 })();
 
 </script>
@@ -997,7 +1019,9 @@
     return {
       id: row.id, nome: row.nome || "", categoria: row.categoria || "Outro",
       storagePath: row.storage_path, fileName: row.file_name || "", fileSize: row.file_size || 0,
-      dataUpload: row.data_upload || ""
+      dataUpload: row.data_upload || "",
+      cadPath: row.cad_path || "", cadName: row.cad_name || "", cadSize: row.cad_size || 0, cadUpload: row.cad_upload || "",
+      orcamentoId: row.orcamento_id || ""
     };
   }
   function artRowToState(row){
@@ -1132,6 +1156,8 @@
     populateObraForm();
     showView("obra");
     if(window.CTOSM){ var ob = getObraById(id); CTOSM.painelObra(document.getElementById("card-vinculos"), id, ob ? ob.nome : ""); }
+    var cv = document.getElementById("card-vinculos");
+    if(cv && !cv.dataset.escutaOrc){ cv.dataset.escutaOrc = "1"; cv.addEventListener("click", function(ev){ if(ev.target && ev.target.id === "ctosm-salvar") setTimeout(function(){ carregarOrcsDaObra(currentObraId, true); }, 1500); }); }
   }
 
   function voltarPainel(){
@@ -1262,6 +1288,7 @@
 
     var paths = obra.fotos.map(function(f){ return f.storagePath; })
       .concat(obra.projetos.map(function(p){ return p.storagePath; }))
+      .concat(obra.projetos.map(function(p){ return p.cadPath; }))
       .concat(obra.arts.map(function(a){ return a.storagePath; }))
       .filter(Boolean);
 
@@ -1584,9 +1611,27 @@
   // ---------- PROJETOS (PDFs) ----------
   var CATEGORIAS_PROJETO = ["Planta baixa","Situação/Implantação","Corte","Elétrico","Hidráulico","Estrutural","Memorial descritivo","Outro"];
 
+  var orcsDaObraCache = {};   // obraId -> [{id,nome,valor_final}]
+  function carregarOrcsDaObra(obraId, force){
+    if(!window.CTOSM || !CTOSM.orcsDaObra) return;
+    if(orcsDaObraCache[obraId] && !force) return;
+    orcsDaObraCache[obraId] = orcsDaObraCache[obraId] || [];
+    CTOSM.orcsDaObra(obraId).then(function(lst){
+      orcsDaObraCache[obraId] = lst || [];
+      if(currentObraId === obraId) renderProjetos();
+    }).catch(function(err){ console.warn("orçamentos da obra:", err); });
+  }
+  function nomeOrcamento(obraId, id){
+    var l = orcsDaObraCache[obraId] || [];
+    var o = l.find(function(x){ return x.id === id; });
+    return o ? o.nome : "";
+  }
+  function baseNome(n){ return (n || "").replace(/\.[^.]+$/, "").toLowerCase().replace(/[^a-z0-9]+/g, ""); }
+
   function renderProjetos(){
     var o = getObraById(currentObraId);
     if(!o) return;
+    carregarOrcsDaObra(o.id);
     var container = document.getElementById("projetos-lista");
     var emptyHint = document.getElementById("projetos-empty-hint");
 
@@ -1596,27 +1641,53 @@
       return;
     }
     emptyHint.style.display = "none";
+    var orcs = orcsDaObraCache[o.id] || [];
 
     container.innerHTML = o.projetos.map(function(p){
       var optionsHtml = CATEGORIAS_PROJETO.map(function(c){
         return '<option value="' + c + '"' + (c === p.categoria ? " selected" : "") + '>' + c + '</option>';
       }).join("");
+      var orcOpts = '<option value="">— nenhum —</option>' + orcs.map(function(x){
+        return '<option value="' + escapeHtml(x.id) + '"' + (x.id === p.orcamentoId ? " selected" : "") + '>' + escapeHtml(x.nome) + '</option>';
+      }).join("");
+      if(p.orcamentoId && !orcs.some(function(x){ return x.id === p.orcamentoId; })){
+        orcOpts += '<option value="' + escapeHtml(p.orcamentoId) + '" selected>(orçamento não vinculado à obra)</option>';
+      }
+      var temPdf = !!p.storagePath, temCad = !!p.cadPath;
+      var icon = temPdf && temCad ? '<div class="projeto-icon duo-icon">PDF<br>DWG</div>'
+               : temCad ? '<div class="projeto-icon cad-icon">DWG</div>' : '<div class="projeto-icon">PDF</div>';
+      var linkOrc = (p.orcamentoId && window.CTOSM) ? ' <a href="' + CTOSM.LINKS.orc + '?orc=' + encodeURIComponent(p.orcamentoId) + '" target="_blank" rel="noopener" style="font-size:12px;">abrir orçamento ↗</a>' : '';
+      var metaPdf = temPdf ? escapeHtml(p.fileName) + ' · ' + formatFileSize(p.fileSize) + ' · anexado em ' + formatDateBR(p.dataUpload) : 'sem PDF';
+      var cadLinha = '<div class="projeto-cad"><span class="tag">CAD</span>' + (temCad
+          ? '<a href="' + publicUrl(p.cadPath) + '" target="_blank" rel="noopener">' + escapeHtml(p.cadName) + '</a> · ' + formatFileSize(p.cadSize) + (p.cadUpload ? ' · ' + formatDateBR(p.cadUpload) : '') +
+            ' <button type="button" class="btn-icon-remove" data-action="remove-cad" data-id="' + p.id + '" style="padding:2px 8px;">remover DWG</button>'
+          : '<span style="color:var(--color-text-muted);">nenhum DWG/DXF anexado</span>') + '</div>';
       return (
         '<div class="projeto-card" data-projeto-id="' + p.id + '">' +
-          '<div class="projeto-icon">PDF</div>' +
+          icon +
           '<div class="projeto-info">' +
             '<label style="margin-bottom:8px;">' +
               '<span class="label-text">Nome do projeto</span>' +
               '<input type="text" data-field="nome" data-id="' + p.id + '" value="' + escapeHtml(p.nome) + '" placeholder="Ex.: Planta baixa - pavimento térreo">' +
             '</label>' +
-            '<label style="margin-bottom:0;">' +
+            '<label style="margin-bottom:8px;">' +
               '<span class="label-text">Categoria</span>' +
               '<select data-field="categoria" data-id="' + p.id + '">' + optionsHtml + '</select>' +
             '</label>' +
-            '<div class="projeto-meta">' + escapeHtml(p.fileName) + ' · ' + formatFileSize(p.fileSize) + ' · anexado em ' + formatDateBR(p.dataUpload) + '</div>' +
+            '<label style="margin-bottom:0;">' +
+              '<span class="label-text">Orçamento (ObraCerta)' + linkOrc + '</span>' +
+              '<select data-field="orcamentoId" data-id="' + p.id + '">' + orcOpts + '</select>' +
+            '</label>' +
+            (orcs.length ? '' : '<div class="projeto-meta">Nenhum orçamento vinculado a esta obra — vincule no painel "Orçamento e contrato desta obra".</div>') +
+            '<div class="projeto-meta">' + metaPdf + '</div>' +
+            cadLinha +
           '</div>' +
           '<div class="projeto-actions">' +
-            '<button type="button" class="btn btn-secondary" data-action="abrir-projeto" data-id="' + p.id + '">Abrir / Baixar</button>' +
+            (temPdf ? '<button type="button" class="btn btn-secondary" data-action="abrir-projeto" data-id="' + p.id + '">Abrir PDF</button>'
+                    : '<button type="button" class="btn btn-secondary" data-action="anexar-pdf" data-id="' + p.id + '">Anexar PDF</button>') +
+            (temCad ? '<button type="button" class="btn btn-secondary" data-action="baixar-cad" data-id="' + p.id + '">Baixar DWG</button>'
+                    : '') +
+            '<button type="button" class="btn btn-secondary" data-action="anexar-cad" data-id="' + p.id + '">' + (temCad ? 'Trocar DWG' : 'Anexar DWG') + '</button>' +
             '<button type="button" class="btn-icon-remove" data-action="remove-projeto" data-id="' + p.id + '">Remover</button>' +
           '</div>' +
         '</div>'
@@ -1630,40 +1701,102 @@
     return (bytes/(1024*1024)).toFixed(1) + " MB";
   }
 
-  function handleProjetosInput(fileList){
+  function isCadFile(f){ return /\.(dwg|dxf|zip|rar|7z)$/i.test(f.name || ""); }
+  function cadMime(name){ return /\.zip$/i.test(name) ? "application/zip" : /\.dxf$/i.test(name) ? "image/vnd.dxf" : "application/octet-stream"; }
+
+  // envia um arquivo e grava em um projeto existente (campo "pdf" ou "cad")
+  function anexarArquivoAoProjeto(o, projeto, file, tipo){
+    var cad = tipo === "cad";
+    var path = "projetos/" + o.id + "/" + (cad ? "cad/" : "") + generateId() + "-" + sanitizeFileName(file.name);
+    var antigo = cad ? projeto.cadPath : projeto.storagePath;
+    return sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { contentType: cad ? cadMime(file.name) : "application/pdf" })
+      .then(function(up){
+        if(up.error) throw up.error;
+        var payload = cad ? { cad_path:path, cad_name:file.name, cad_size:file.size, cad_upload:todayISO() }
+                          : { storage_path:path, file_name:file.name, file_size:file.size, data_upload:todayISO() };
+        return sb.from("projetos").update(payload).eq("id", projeto.id).select().single();
+      }).then(function(res){
+        if(res.error) throw res.error;
+        var novo = projetoRowToState(res.data);
+        Object.keys(novo).forEach(function(k){ projeto[k] = novo[k]; });
+        if(antigo) sb.storage.from(window.SUPABASE_BUCKET).remove([antigo]);
+        return projeto;
+      });
+  }
+
+  // tipo: "pdf" ou "cad" — cria projetos novos ou junta ao projeto de mesmo nome que ainda não tem esse arquivo
+  function handleArquivosProjeto(fileList, tipo){
     var o = getObraById(currentObraId);
     if(!o) return;
+    var cad = tipo === "cad";
     var files = Array.prototype.slice.call(fileList || []);
     var validos = files.filter(function(f){
-      var ok = isPdfFile(f);
-      if(!ok) toast('Arquivo "' + f.name + '" ignorado: apenas PDF é aceito.');
+      var ok = cad ? isCadFile(f) : isPdfFile(f);
+      if(!ok) toast('Arquivo "' + f.name + '" ignorado: ' + (cad ? "use DWG, DXF ou ZIP." : "apenas PDF é aceito."));
       return ok;
     });
     if(validos.length === 0) return;
-
-    toast("Enviando " + validos.length + " projeto(s)...");
-    Promise.all(validos.map(function(file){
-      var path = "projetos/" + o.id + "/" + generateId() + "-" + sanitizeFileName(file.name);
-      return sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { contentType:"application/pdf" })
-        .then(function(uploadRes){
-          if(uploadRes.error) throw uploadRes.error;
-          return sb.from("projetos").insert({
-            obra_id:o.id, nome:file.name.replace(/\.pdf$/i, ""), categoria:"Outro",
-            storage_path:path, file_name:file.name, file_size:file.size, data_upload: todayISO()
-          }).select().single();
+    toast("Enviando " + validos.length + " arquivo(s)...");
+    var falhas = 0, juntados = 0;
+    var seq = Promise.resolve();
+    validos.forEach(function(file){
+      seq = seq.then(function(){
+        var par = o.projetos.find(function(p){
+          return (cad ? !p.cadPath : !p.storagePath) &&
+                 (baseNome(p.nome) === baseNome(file.name) || baseNome(cad ? p.fileName : p.cadName) === baseNome(file.name));
         });
-    })).then(function(results){
-      var falhas = 0;
-      results.forEach(function(res){
-        if(res.error){ falhas++; console.error(res.error); return; }
-        o.projetos.push(projetoRowToState(res.data));
-      });
+        if(par){ juntados++; return anexarArquivoAoProjeto(o, par, file, tipo); }
+        var path = "projetos/" + o.id + "/" + (cad ? "cad/" : "") + generateId() + "-" + sanitizeFileName(file.name);
+        return sb.storage.from(window.SUPABASE_BUCKET).upload(path, file, { contentType: cad ? cadMime(file.name) : "application/pdf" })
+          .then(function(up){
+            if(up.error) throw up.error;
+            var row = { obra_id:o.id, nome:file.name.replace(/\.[^.]+$/, ""), categoria:"Outro" };
+            if(cad){ row.cad_path = path; row.cad_name = file.name; row.cad_size = file.size; row.cad_upload = todayISO(); }
+            else { row.storage_path = path; row.file_name = file.name; row.file_size = file.size; row.data_upload = todayISO(); }
+            var orcs = orcsDaObraCache[o.id] || [];
+            if(orcs.length === 1) row.orcamento_id = orcs[0].id;
+            return sb.from("projetos").insert(row).select().single();
+          }).then(function(res){
+            if(res.error) throw res.error;
+            o.projetos.push(projetoRowToState(res.data));
+          });
+      }).catch(function(err){ falhas++; console.error(err); });
+    });
+    seq.then(function(){
       tocarUpdatedAt(o);
       renderProjetos();
-      toast(falhas ? (falhas + " arquivo(s) não puderam ser enviados.") : "Projeto(s) anexado(s).");
-    }).catch(function(err){
-      console.error(err);
-      toast("Não foi possível salvar um ou mais arquivos. Verifique a conexão.");
+      toast(falhas ? (falhas + " arquivo(s) não puderam ser enviados.")
+                   : (juntados ? "Arquivo(s) anexado(s) — " + juntados + " juntado(s) ao projeto de mesmo nome." : "Arquivo(s) anexado(s)."));
+    });
+  }
+  function handleProjetosInput(fileList){ handleArquivosProjeto(fileList, "pdf"); }
+
+  var anexoAlvoId = null;
+  function anexarNoProjeto(id, tipo){
+    anexoAlvoId = id;
+    document.getElementById(tipo === "cad" ? "input-cad-anexo" : "input-pdf-anexo").click();
+  }
+  function handleAnexoUnico(file, tipo){
+    var o = getObraById(currentObraId);
+    var p = o && o.projetos.find(function(x){ return x.id === anexoAlvoId; });
+    if(!p || !file) return;
+    if(tipo === "cad" ? !isCadFile(file) : !isPdfFile(file)){ toast(tipo === "cad" ? "Use um arquivo DWG, DXF ou ZIP." : "Use um arquivo PDF."); return; }
+    toast("Enviando " + file.name + "...");
+    anexarArquivoAoProjeto(o, p, file, tipo).then(function(){
+      tocarUpdatedAt(o); renderProjetos(); toast(tipo === "cad" ? "DWG anexado ao projeto." : "PDF anexado ao projeto.");
+    }).catch(function(err){ console.error(err); toast("Não foi possível enviar o arquivo."); });
+  }
+  function removerCad(id){
+    var o = getObraById(currentObraId);
+    var p = o && o.projetos.find(function(x){ return x.id === id; });
+    if(!p || !p.cadPath) return;
+    if(!confirm("Remover o arquivo DWG/DXF deste projeto?")) return;
+    var antigo = p.cadPath;
+    sb.from("projetos").update({ cad_path:null, cad_name:null, cad_size:null, cad_upload:null }).eq("id", id).then(function(res){
+      if(res.error){ console.error(res.error); toast("Não foi possível remover o DWG."); return; }
+      p.cadPath = ""; p.cadName = ""; p.cadSize = 0; p.cadUpload = "";
+      tocarUpdatedAt(o); renderProjetos();
+      sb.storage.from(window.SUPABASE_BUCKET).remove([antigo]);
     });
   }
 
@@ -1674,6 +1807,13 @@
     if(!projeto) return;
     projeto[field] = value;
     tocarUpdatedAt(o);
+    if(field === "orcamentoId"){
+      sb.from("projetos").update({ orcamento_id: value || null }).eq("id", id).then(function(res){
+        if(res.error){ console.error(res.error); toast("Não foi possível salvar o orçamento do projeto."); return; }
+        renderProjetos();
+      });
+      return;
+    }
     debouncedUpdate("projetos", id, { nome: field === "nome" ? value : projeto.nome, categoria: field === "categoria" ? value : projeto.categoria });
   }
 
@@ -1689,7 +1829,8 @@
       o.projetos = o.projetos.filter(function(p){ return p.id !== id; });
       tocarUpdatedAt(o);
       renderProjetos();
-      if(item.storagePath) sb.storage.from(window.SUPABASE_BUCKET).remove([item.storagePath]);
+      var rm = [item.storagePath, item.cadPath].filter(Boolean);
+      if(rm.length) sb.storage.from(window.SUPABASE_BUCKET).remove(rm);
     });
   }
 
@@ -2186,11 +2327,12 @@
           return '<tr>' +
             '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(p.nome) || "&nbsp;") + '</td>' +
             '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(p.categoria) + '</td>' +
-            '<td style="border:1px solid #D7DEE3;padding:6px;">' + escapeHtml(p.fileName) + '</td>' +
-            '<td style="border:1px solid #D7DEE3;padding:6px;text-align:center;">' + formatFileSize(p.fileSize) + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(p.fileName) || "—") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(p.cadName) || "—") + '</td>' +
+            '<td style="border:1px solid #D7DEE3;padding:6px;">' + (escapeHtml(nomeOrcamento(o.id, p.orcamentoId)) || "—") + '</td>' +
           '</tr>';
         }).join("")
-      : '<tr><td colspan="4" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhum projeto anexado.</td></tr>';
+      : '<tr><td colspan="5" style="border:1px solid #D7DEE3;padding:8px;color:#5B6B7A;">Nenhum projeto anexado.</td></tr>';
 
     var projetosSection =
       '<h2 style="font-size:15px;color:#0F2A43;border-bottom:1px solid #D7DEE3;padding-bottom:4px;margin-top:18px;">4. Projetos da obra</h2>' +
@@ -2198,12 +2340,13 @@
         '<thead><tr style="background:#EEF1F4;">' +
           '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Nome</th>' +
           '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Categoria</th>' +
-          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Arquivo</th>' +
-          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Tamanho</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">PDF</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">DWG / DXF</th>' +
+          '<th style="border:1px solid #D7DEE3;padding:6px;text-align:left;">Orçamento</th>' +
         '</tr></thead>' +
         '<tbody>' + projetosRows + '</tbody>' +
       '</table>' +
-      (o.projetos.length ? '<p style="font-size:11px;color:#5B6B7A;">Os arquivos PDF estão disponíveis no sistema (não embutidos neste relatório).</p>' : '');
+      (o.projetos.length ? '<p style="font-size:11px;color:#5B6B7A;">Os arquivos PDF e DWG estão disponíveis no sistema (não embutidos neste relatório).</p>' : '');
 
     var artsRows = o.arts.length
       ? o.arts.map(function(a){
@@ -2647,11 +2790,21 @@
     document.getElementById("projetos-lista").addEventListener("change", function(e){
       var t = e.target;
       if(t.dataset && t.dataset.field === "categoria") updateProjetoField(t.dataset.id, "categoria", t.value);
+      if(t.dataset && t.dataset.field === "orcamentoId") updateProjetoField(t.dataset.id, "orcamentoId", t.value);
     });
+    document.getElementById("btn-add-cad").addEventListener("click", function(){ document.getElementById("input-cad").click(); });
+    document.getElementById("input-cad").addEventListener("change", function(e){ handleArquivosProjeto(e.target.files, "cad"); e.target.value = ""; });
+    document.getElementById("input-cad-anexo").addEventListener("change", function(e){ handleAnexoUnico(e.target.files[0], "cad"); e.target.value = ""; });
+    document.getElementById("input-pdf-anexo").addEventListener("change", function(e){ handleAnexoUnico(e.target.files[0], "pdf"); e.target.value = ""; });
     document.getElementById("projetos-lista").addEventListener("click", function(e){
       var o = getObraById(currentObraId);
       var abrirBtn = e.target.closest('[data-action="abrir-projeto"]');
       if(abrirBtn){ abrirArquivo(o && o.projetos.find(function(p){ return p.id === abrirBtn.dataset.id; })); return; }
+      var b2 = e.target.closest('[data-action]');
+      if(b2 && b2.dataset.action === "baixar-cad"){ var pc = o && o.projetos.find(function(p){ return p.id === b2.dataset.id; }); if(pc && pc.cadPath) window.open(publicUrl(pc.cadPath), "_blank"); return; }
+      if(b2 && b2.dataset.action === "anexar-cad"){ anexarNoProjeto(b2.dataset.id, "cad"); return; }
+      if(b2 && b2.dataset.action === "anexar-pdf"){ anexarNoProjeto(b2.dataset.id, "pdf"); return; }
+      if(b2 && b2.dataset.action === "remove-cad"){ removerCad(b2.dataset.id); return; }
       var removerBtn = e.target.closest('[data-action="remove-projeto"]');
       if(removerBtn) removeProjeto(removerBtn.dataset.id);
     });
